@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { User, LogIn } from "lucide-react";
 import "../styles/Auth.css";
 
 const Login: React.FC = () => {
@@ -18,12 +19,35 @@ const Login: React.FC = () => {
 
   return (
     <div className="auth-container">
-      <h2>Login</h2>
-      <form onSubmit={handleLogin}>
-        <input placeholder="Enter your name" value={name} onChange={(e) => setName(e.target.value)} />
-        <button type="submit">Login</button>
-      </form>
-      <p>New here? <Link to="/signup">Signup</Link></p>
+      <div className="auth-box">
+        <h2>Welcome Back</h2>
+        <div className="app-title">FinTrack</div>
+        <form className="auth-form" onSubmit={handleLogin}>
+          <div className="form-group">
+            <User className="form-icon" size={20} />
+            <input 
+              type="text"
+              placeholder="Enter your username" 
+              value={name} 
+              onChange={(e) => setName(e.target.value)} 
+              required
+            />
+          </div>
+          
+          <button className="auth-btn" type="submit">
+            Sign In <LogIn size={16} style={{ marginLeft: '8px' }} />
+          </button>
+        </form>
+        
+        <div className="auth-link-container">
+          <p>
+            New to FinTrack?{" "}
+            <Link className="auth-link" to="/signup">
+              Create Account
+            </Link>
+          </p>
+        </div>
+      </div>
     </div>
   );
 };
