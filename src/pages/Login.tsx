@@ -1,46 +1,30 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import AuthLayout from "../components/AuthLayout";
+import { useAuth } from "../context/AuthContext";
+import "../styles/Auth.css";
 
 const Login: React.FC = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you’d normally validate login with backend
-    if (email && password) {
-      navigate("/dashboard"); // ✅ Redirect to Dashboard
-    } else {
-      alert("Enter email & password!");
+    if (name.trim()) {
+      login(name);
+      navigate("/dashboard");
     }
   };
 
   return (
-    <AuthLayout>
+    <div className="auth-container">
       <h2>Login</h2>
       <form onSubmit={handleLogin}>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
+        <input placeholder="Enter your name" value={name} onChange={(e) => setName(e.target.value)} />
         <button type="submit">Login</button>
       </form>
-      <p>
-        Don’t have an account? <Link to="/signup">Signup</Link>
-      </p>
-    </AuthLayout>
+      <p>New here? <Link to="/signup">Signup</Link></p>
+    </div>
   );
 };
 

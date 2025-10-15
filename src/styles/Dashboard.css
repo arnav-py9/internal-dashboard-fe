@@ -1,108 +1,77 @@
-/* Layout */
-.dashboard-layout {
+.dashboard-page {
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  background: #f8fafc;
+  background-color: white;
 }
 
-.dashboard-content {
+.dashboard-body {
   display: flex;
-  flex: 1;
 }
 
-/* Navbar */
-.navbar {
+.dashboard-main {
+  flex: 1;
+  padding: 2rem;
+}
+
+.transactions-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 2rem;
-  background: #0f2027;
+}
+
+.transactions-header button {
+  background-color: #007bff;
   color: white;
-}
-
-.logo {
-  font-size: 1.5rem;
-  font-weight: bold;
-}
-
-.profile {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.profile img {
-  border-radius: 50%;
-}
-
-/* Sidebar */
-.sidebar {
-  width: 200px;
-  background: #203a43;
-  color: white;
-  padding: 1.5rem;
-}
-
-.sidebar h2 {
-  margin-bottom: 1rem;
-}
-
-.sidebar ul {
-  list-style: none;
-  padding: 0;
-}
-
-.sidebar li {
-  margin: 0.8rem 0;
-}
-
-.sidebar a {
-  color: white;
-  text-decoration: none;
-}
-
-.sidebar a:hover {
-  text-decoration: underline;
-}
-
-/* Main Content */
-.main-content {
-  flex: 1;
-  padding: 2rem;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
 }
 
 .cards {
   display: flex;
   gap: 1rem;
-  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
 }
 
 .card {
+  background-color: #f9f9f9;
+  border: 1px solid #e5e5e5;
+  padding: 1rem;
+  border-radius: 10px;
   flex: 1;
-  background: white;
-  padding: 1rem;
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  font-weight: bold;
+  min-width: 200px;
 }
 
-/* Table */
-.table-container {
-  background: white;
-  padding: 1rem;
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+.card input {
+  width: 100%;
+  padding: 0.4rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
 }
 
-.table-container table {
+.filters {
+  display: flex;
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.filters input,
+.filters select {
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+table {
   width: 100%;
   border-collapse: collapse;
 }
 
-.table-container th,
-.table-container td {
+th,
+td {
   padding: 0.8rem;
-  border-bottom: 1px solid #ddd;
+  border: 1px solid #e5e5e5;
   text-align: left;
 }

@@ -1,16 +1,23 @@
 import React from "react";
-import { Link } from "react-router-dom";
-import "../styles/Dashboard.css";
+import { DollarSign, TrendingUp } from "lucide-react";
+import "../styles/Sidebar.css";
 
-const Sidebar: React.FC = () => {
+interface SidebarProps {
+  isOpen: boolean;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
   return (
-    <aside className="sidebar">
-      <h2>Menu</h2>
+    <div className={`sidebar ${isOpen ? "open" : "closed"}`}>
       <ul>
-        <li><Link to="/dashboard">📊 Dashboard</Link></li>
-        <li><Link to="/calculator">🧮 Calculator</Link></li>
+        <li>
+          <DollarSign size={18} color="#007bff" /> Transactions
+        </li>
+        <li>
+          <TrendingUp size={18} color="#007bff" /> Profit From Business
+        </li>
       </ul>
-    </aside>
+    </div>
   );
 };
 
