@@ -72,8 +72,11 @@ const Dashboard: React.FC = () => {
     "July", "August", "September", "October", "November", "December"
   ];
 
-  // Calculate expiry
-  const monthsLeft = totalBalance > 0 && monthlyExp > 0 ? Math.floor(totalBalance / monthlyExp) : 0;
+  // FIXED: Calculate expiry correctly - balance divided by monthly spend
+  const monthsLeft = monthlyExp > 0 && totalBalance > 0 
+    ? Math.floor(totalBalance / monthlyExp) 
+    : 0;
+  
   const expiryDate = new Date();
   expiryDate.setMonth(expiryDate.getMonth() + monthsLeft);
 
@@ -95,14 +98,12 @@ const Dashboard: React.FC = () => {
   const handleAddTransaction = () => {
     if (newTransaction.details.trim() && newTransaction.amount > 0) {
       if (editingId) {
-        // Update existing
         setTransactions(transactions.map(t => 
           t.id === editingId ? { ...newTransaction, id: editingId } : t
         ));
         showNotification("Transaction updated successfully!");
         setEditingId(null);
       } else {
-        // Add new
         const transaction = {
           ...newTransaction,
           id: Date.now().toString()
@@ -146,7 +147,6 @@ const Dashboard: React.FC = () => {
       <div className="dashboard-body">
         <Sidebar isOpen={isSidebarOpen} currentPage="transactions" />
         <main className="dashboard-main">
-          {/* Page Header */}
           <div className="page-header">
             <div className="header-content">
               <h1 className="page-title">Transaction Overview</h1>
@@ -161,7 +161,6 @@ const Dashboard: React.FC = () => {
             </button>
           </div>
 
-          {/* Stats Cards */}
           <div className="stats-container">
             <div className="stat-card-pro debit-card">
               <div className="stat-header">
@@ -209,7 +208,7 @@ const Dashboard: React.FC = () => {
                 </div>
               </div>
               <div className="stat-body">
-                <p className="stat-label">Monthly Budget</p>
+                <p className="stat-label">Monthly Spend</p>
                 <div className="budget-bar">
                   <div 
                     className="budget-fill" 
@@ -230,15 +229,15 @@ const Dashboard: React.FC = () => {
               <div className="stat-body">
                 <p className="stat-label">Estimated Runway</p>
                 <h2 className="stat-amount">
-                  {monthsLeft > 0 ? months[expiryDate.getMonth()].slice(0, 3) : 'N/A'}
-                  {monthsLeft > 0 && ` '${expiryDate.getFullYear().toString().slice(-2)}`}
+                  {monthsLeft > 0 
+                    ? `${months[expiryDate.getMonth()].slice(0, 3)} '${expiryDate.getFullYear().toString().slice(-2)}`
+                    : 'N/A'}
                 </h2>
                 <p className="stat-detail">Based on current spending</p>
               </div>
             </div>
           </div>
 
-          {/* Transactions Table */}
           <div className="table-section">
             <div className="table-header">
               <h2 className="section-title">Recent Transactions</h2>
@@ -295,8 +294,8 @@ const Dashboard: React.FC = () => {
                       <th>Category</th>
                       <th>Type</th>
                       <th>Date</th>
-                      <th className="text-right">Amount</th>
-                      <th className="text-center">Actions</th>
+                      <th style={{ textAlign: 'right' }}>Amount</th>
+                      <th style={{ textAlign: 'center' }}>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -319,10 +318,10 @@ const Dashboard: React.FC = () => {
                             year: 'numeric'
                           })}
                         </td>
-                        <td className={`text-right amount-cell ${t.type.toLowerCase()}`}>
+                        <td className={`amount-cell ${t.type.toLowerCase()}`} style={{ textAlign: 'right' }}>
                           {t.type === "Credit" ? "+" : "-"}₹{t.amount.toLocaleString()}
                         </td>
-                        <td className="text-center">
+                        <td style={{ textAlign: 'center' }}>
                           <div className="action-buttons">
                             <button 
                               className="btn-icon edit" 
@@ -350,7 +349,6 @@ const Dashboard: React.FC = () => {
         </main>
       </div>
 
-      {/* Enhanced Modal */}
       {showModal && (
         <div className="modal-overlay-pro" onClick={() => {
           setShowModal(false);
@@ -464,7 +462,6 @@ const Dashboard: React.FC = () => {
         </div>
       )}
 
-      {/* Toast Notification */}
       {notification && (
         <div className="toast-notification">
           <div className="toast-content">

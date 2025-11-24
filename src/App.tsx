@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import ProfitFromBusiness from "./pages/ProfitFromBusiness";
+import Signup from "./pages/Signup";
 
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
   const { user } = useAuth();
@@ -16,7 +17,7 @@ const App: React.FC = () => (
       <Routes>
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Navigate to="/login" />} />
+        <Route path="/signup" element={<Signup/>} />
         <Route 
           path="/dashboard" 
           element={

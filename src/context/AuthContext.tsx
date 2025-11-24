@@ -2,28 +2,30 @@ import React, { createContext, useContext, useState } from "react";
 
 interface AuthContextType {
   user: string | null;
-  login: (name: string) => void;
-  signup: (name: string) => void;
+  login: (email: string) => void;
+  signup: (email: string) => void;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<string | null>(localStorage.getItem("username") || null);
+  const [user, setUser] = useState<string | null>(
+    localStorage.getItem("userEmail") || null
+  );
 
-  const login = (name: string) => {
-    localStorage.setItem("username", name);
-    setUser(name);
+  const login = (email: string) => {
+    localStorage.setItem("userEmail", email);
+    setUser(email);
   };
 
-  const signup = (name: string) => {
-    localStorage.setItem("username", name);
-    setUser(name);
+  const signup = (email: string) => {
+    localStorage.setItem("userEmail", email);
+    setUser(email);
   };
 
   const logout = () => {
-    localStorage.removeItem("username");
+    localStorage.removeItem("userEmail");
     setUser(null);
   };
 

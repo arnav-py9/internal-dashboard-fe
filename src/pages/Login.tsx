@@ -5,87 +5,46 @@ import { Mail, Lock, ArrowRight } from "lucide-react";
 import "../styles/Auth.css";
 
 const Login: React.FC = () => {
-  const [isLogin, setIsLogin] = useState<boolean>(true);
-  const [name, setName] = useState<string>("");
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const { login, signup } = useAuth();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isLogin) {
-      if (email.trim() && password.trim()) {
-        login(email);
-        navigate("/dashboard");
-      }
-    } else {
-      if (name.trim() && email.trim() && password.trim()) {
-        signup(name);
-        navigate("/dashboard");
-      }
-    }
-  };
+    setError("");
 
-  const switchMode = (loginMode: boolean) => {
-    setIsLogin(loginMode);
-    setName("");
-    setEmail("");
-    setPassword("");
+    const res = await fetch("http://127.0.0.1:8000/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      setError(data.detail || "Invalid credentials");
+      return;
+    }
+
+    login(email);
+    navigate("/dashboard");
   };
 
   return (
     <div className="auth-container">
       <div className="gradient-bg"></div>
-      <div className="floating-circle-1"></div>
-      <div className="floating-circle-2"></div>
-
-      <div className="auth-card" key={isLogin ? "login" : "signup"}>
+      <div className="auth-card">
         <div className="auth-header">
           <div className="app-logo">FinTrack</div>
-          <h1 className="auth-title">
-            {isLogin ? "Welcome Back" : "Create Account"}
-          </h1>
-          <p className="auth-subtitle">
-            {isLogin 
-              ? "Sign in to manage your finances" 
-              : "Start tracking your expenses today"}
-          </p>
+          <h1 className="auth-title">Welcome Back</h1>
+          <p className="auth-subtitle">Sign in to manage your finances</p>
         </div>
 
-        <div className="toggle-container">
-          <button
-            className={`toggle-btn ${isLogin ? "active" : ""}`}
-            onClick={() => switchMode(true)}
-          >
-            Login
-          </button>
-          <button
-            className={`toggle-btn ${!isLogin ? "active" : ""}`}
-            onClick={() => switchMode(false)}
-          >
-            Signup
-          </button>
-        </div>
+        {error && <p className="error-text">{error}</p>}
 
         <form className="auth-form" onSubmit={handleSubmit}>
-          {!isLogin && (
-            <div className="form-group slide-down">
-              <label className="form-label">Full Name</label>
-              <div className="input-wrapper">
-                <Mail className="input-icon" size={18} />
-                <input
-                  type="text"
-                  placeholder="John Doe"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="form-input"
-                  required
-                />
-              </div>
-            </div>
-          )}
-
           <div className="form-group">
             <label className="form-label">Email Address</label>
             <div className="input-wrapper">
@@ -116,32 +75,17 @@ const Login: React.FC = () => {
             </div>
           </div>
 
-          {isLogin && (
-            <div className="forgot-password">
-              <a href="#" className="forgot-link" onClick={(e) => e.preventDefault()}>
-                Forgot password?
-              </a>
-            </div>
-          )}
-
           <button type="submit" className="submit-btn">
-            <span>{isLogin ? "Sign In" : "Create Account"}</span>
+            <span>Sign In</span>
             <ArrowRight size={18} className="btn-icon" />
           </button>
         </form>
 
         <div className="auth-footer">
           <p className="footer-text">
-            {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
-            <a
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                switchMode(!isLogin);
-              }}
-              className="footer-link"
-            >
-              {isLogin ? "Sign up free" : "Sign in"}
+            Don't have an account?{" "}
+            <a href="/signup" className="footer-link">
+              Sign up free
             </a>
           </p>
         </div>
