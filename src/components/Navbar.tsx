@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Menu, Rocket, LogOut, User, Settings, HelpCircle, Moon, Sun, X, Save, Mail, FileText, Shield, Database, Zap } from "lucide-react";
+import { Menu, Rocket, LogOut, User, Settings, HelpCircle, X, Save, Mail, FileText, Shield, Database, Zap } from "lucide-react";
 import "../styles/Navbar.css";
 import { useAuth } from "../context/AuthContext";
-import { useTheme } from "../context/ThemeContext";
 import { useNavigate } from "react-router-dom";
 
 interface NavbarProps {
@@ -11,7 +10,6 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ toggleSidebar }) => {
   const { user, logout } = useAuth();
-  const { isDarkMode, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [showDropdown, setShowDropdown] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -104,13 +102,7 @@ const Navbar: React.FC<NavbarProps> = ({ toggleSidebar }) => {
         </div>
 
         <div className="navbar-right">
-          <button 
-            className="icon-button theme-toggle"
-            onClick={toggleTheme}
-            title={isDarkMode ? "Light mode" : "Dark mode"}
-          >
-            {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
-          </button>
+          
 
           <div className="user-menu" ref={dropdownRef}>
             <button 
