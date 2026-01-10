@@ -4,6 +4,32 @@ import Sidebar from "../components/Sidebar";
 import { Plus, TrendingDown, TrendingUp, Wallet, Calendar, X, Search, Edit2, Trash2 } from "lucide-react";
 import "../styles/Dashboard.css";
 
+async function fetchMonthlyExp(): Promise<number> {
+  const userId = localStorage.getItem("user_id");
+  if (!userId) return 1000;
+
+  const res = await fetch("http://localhost:8000/api/users-finances", {
+    headers: { "user-id": userId }
+  });
+
+  const data = await res.json();
+  return data.user_monthly_expenditure ?? 1000;
+}
+
+async function saveMonthlyExp(value: number) {
+  const userId = localStorage.getItem("user_id");
+  if (!userId) return;
+
+  await fetch("http://localhost:8000/api/users-finances", {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      "user-id": userId
+    },
+    body: JSON.stringify({ user_monthly_expenditure: value })
+  });
+}
+
 interface Transaction {
   id: string;
   details: string;
@@ -19,10 +45,7 @@ const Dashboard: React.FC = () => {
     return saved ? JSON.parse(saved) : [];
   });
   const [isSidebarOpen, setSidebarOpen] = useState(true);
-  const [monthlyExp, setMonthlyExp] = useState(() => {
-    const saved = localStorage.getItem("monthlyExp");
-    return saved ? parseFloat(saved) : 10000;
-  });
+  const [monthlyExp, setMonthlyExp] = useState<number>(1000);
   const [filterType, setFilterType] = useState("All");
   const [searchDetails, setSearchDetails] = useState("");
   const [filterMonth, setFilterMonth] = useState("All");
@@ -46,8 +69,9 @@ const Dashboard: React.FC = () => {
   }, [transactions]);
 
   useEffect(() => {
-    localStorage.setItem("monthlyExp", monthlyExp.toString());
-  }, [monthlyExp]);
+  fetchMonthlyExp().then(setMonthlyExp);
+}, []);
+
 
   // Get profit from localStorage
   const getProfit = () => {
@@ -201,7 +225,13 @@ const Dashboard: React.FC = () => {
                   <input
                     type="number"
                     value={monthlyExp}
-                    onChange={(e) => setMonthlyExp(Number(e.target.value))}
+                    
+                    onChange={(e) => {
+                   const value = Number(e.target.value);
+                   setMonthlyExp(value);
+                   saveMonthlyExp(value);
+                   }}
+
                     className="exp-input"
                   />
                   <span className="exp-label">per month</span>
