@@ -16,11 +16,11 @@ async function fetchMonthlyExp(): Promise<number> {
   return data.user_monthly_expenditure ?? 1000;
 }
 
-async function saveMonthlyExp(value: number) {
+async function saveMonthlyExp(value: number): Promise<number> {
   const userId = localStorage.getItem("user_id");
-  if (!userId) return;
+  if (!userId) return value;
 
-  await fetch("http://localhost:8000/api/users-finances", {
+  const res = await fetch("http://127.0.0.1:8000/api/users-finances/", {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -28,6 +28,9 @@ async function saveMonthlyExp(value: number) {
     },
     body: JSON.stringify({ user_monthly_expenditure: value })
   });
+
+  const data = await res.json();
+  return data.user_monthly_expenditure;
 }
 
 interface Transaction {
@@ -52,7 +55,7 @@ const Dashboard: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
   const [notification, setNotification] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
-  
+
   const [newTransaction, setNewTransaction] = useState({
     details: "",
     type: "Debit" as "Credit" | "Debit",
@@ -69,8 +72,8 @@ const Dashboard: React.FC = () => {
   }, [transactions]);
 
   useEffect(() => {
-  fetchMonthlyExp().then(setMonthlyExp);
-}, []);
+    fetchMonthlyExp().then(setMonthlyExp);
+  }, []);
 
 
   // Get profit from localStorage
@@ -97,10 +100,10 @@ const Dashboard: React.FC = () => {
   ];
 
   // FIXED: Calculate expiry correctly - balance divided by monthly spend
-  const monthsLeft = monthlyExp > 0 && totalBalance > 0 
-    ? Math.floor(totalBalance / monthlyExp) 
+  const monthsLeft = monthlyExp > 0 && totalBalance > 0
+    ? Math.floor(totalBalance / monthlyExp)
     : 0;
-  
+
   const expiryDate = new Date();
   expiryDate.setMonth(expiryDate.getMonth() + monthsLeft);
 
@@ -122,7 +125,7 @@ const Dashboard: React.FC = () => {
   const handleAddTransaction = () => {
     if (newTransaction.details.trim() && newTransaction.amount > 0) {
       if (editingId) {
-        setTransactions(transactions.map(t => 
+        setTransactions(transactions.map(t =>
           t.id === editingId ? { ...newTransaction, id: editingId } : t
         ));
         showNotification("Transaction updated successfully!");
@@ -135,7 +138,7 @@ const Dashboard: React.FC = () => {
         setTransactions([transaction, ...transactions]);
         showNotification(`${newTransaction.type} of ₹${newTransaction.amount.toLocaleString()} added!`);
       }
-      
+
       setNewTransaction({
         details: "",
         type: "Debit",
@@ -225,23 +228,28 @@ const Dashboard: React.FC = () => {
                   <input
                     type="number"
                     value={monthlyExp}
-                    
-                    onChange={(e) => {
-                   const value = Number(e.target.value);
-                   setMonthlyExp(value);
-                   saveMonthlyExp(value);
-                   }}
-
                     className="exp-input"
+
+                    onChange={(e) => {
+                      setMonthlyExp(Number(e.target.value));
+                    }}
+
+                    onKeyDown={async (e) => {
+                      if (e.key === "Enter") {
+                        const updated = await saveMonthlyExp(monthlyExp);
+                        setMonthlyExp(updated);
+                      }
+                    }}
                   />
+
                   <span className="exp-label">per month</span>
                 </div>
               </div>
               <div className="stat-body">
                 <p className="stat-label">Monthly Spend</p>
                 <div className="budget-bar">
-                  <div 
-                    className="budget-fill" 
+                  <div
+                    className="budget-fill"
                     style={{ width: `${Math.min((totalDebit / monthlyExp) * 100, 100)}%` }}
                   ></div>
                 </div>
@@ -259,7 +267,7 @@ const Dashboard: React.FC = () => {
               <div className="stat-body">
                 <p className="stat-label">Estimated Runway</p>
                 <h2 className="stat-amount">
-                  {monthsLeft > 0 
+                  {monthsLeft > 0
                     ? `${months[expiryDate.getMonth()].slice(0, 3)} '${expiryDate.getFullYear().toString().slice(-2)}`
                     : 'N/A'}
                 </h2>
@@ -342,8 +350,8 @@ const Dashboard: React.FC = () => {
                           </span>
                         </td>
                         <td className="date-cell">
-                          {new Date(t.date).toLocaleDateString('en-US', { 
-                            month: 'short', 
+                          {new Date(t.date).toLocaleDateString('en-US', {
+                            month: 'short',
                             day: 'numeric',
                             year: 'numeric'
                           })}
@@ -353,15 +361,15 @@ const Dashboard: React.FC = () => {
                         </td>
                         <td style={{ textAlign: 'center' }}>
                           <div className="action-buttons">
-                            <button 
-                              className="btn-icon edit" 
+                            <button
+                              className="btn-icon edit"
                               onClick={() => handleEdit(t)}
                               title="Edit"
                             >
                               <Edit2 size={16} />
                             </button>
-                            <button 
-                              className="btn-icon delete" 
+                            <button
+                              className="btn-icon delete"
                               onClick={() => handleDelete(t.id)}
                               title="Delete"
                             >
@@ -474,8 +482,8 @@ const Dashboard: React.FC = () => {
               </div>
 
               <div className="modal-actions">
-                <button 
-                  className="btn-secondary" 
+                <button
+                  className="btn-secondary"
                   onClick={() => {
                     setShowModal(false);
                     setEditingId(null);
