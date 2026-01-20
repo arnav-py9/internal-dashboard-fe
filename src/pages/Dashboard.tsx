@@ -491,7 +491,15 @@ const Dashboard: React.FC = () => {
                 >
                   Cancel
                 </button>
-                <button className="btn-primary" onClick={handleAddTransaction}>
+                <button
+                  className="btn-primary"
+                  onClick={handleAddTransaction}
+                  disabled={!newTransaction.details.trim() || newTransaction.amount <= 0 || !newTransaction.date}
+                  style={{
+                    opacity: (!newTransaction.details.trim() || newTransaction.amount <= 0 || !newTransaction.date) ? 0.5 : 1,
+                    cursor: (!newTransaction.details.trim() || newTransaction.amount <= 0 || !newTransaction.date) ? 'not-allowed' : 'pointer'
+                  }}
+                >
                   {editingId ? 'Update' : 'Add'} Transaction
                 </button>
               </div>
