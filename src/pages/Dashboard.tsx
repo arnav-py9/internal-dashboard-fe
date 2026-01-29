@@ -246,9 +246,8 @@ const Dashboard: React.FC = () => {
       if (editingId) {
         const updated = await updateTransaction(editingId, transactionData);
         if (updated) {
-          setTransactions(transactions.map(t =>
-            t._id === editingId ? updated : t
-          ));
+          const updatedTransactions = await fetchTransactions();
+          setTransactions(updatedTransactions);
           showNotification("Transaction updated successfully!");
           setEditingId(null);
         } else {
@@ -258,7 +257,8 @@ const Dashboard: React.FC = () => {
       } else {
         const created = await createTransaction(transactionData);
         if (created) {
-          setTransactions([created, ...transactions]);
+          const updatedTransactions = await fetchTransactions();
+          setTransactions(updatedTransactions);
           showNotification(`${newTransaction.type} of ₹${newTransaction.amount.toLocaleString()} added!`);
         } else {
           showNotification("Failed to add transaction");
@@ -295,7 +295,8 @@ const Dashboard: React.FC = () => {
     if (window.confirm("Are you sure you want to delete this transaction?")) {
       const success = await deleteTransaction(id);
       if (success) {
-        setTransactions(transactions.filter(t => t._id !== id));
+        const updatedTransactions = await fetchTransactions();
+        setTransactions(updatedTransactions);
         showNotification("Transaction deleted successfully!");
       } else {
         showNotification("Failed to delete transaction");
