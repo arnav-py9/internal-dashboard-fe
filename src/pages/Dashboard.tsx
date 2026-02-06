@@ -182,11 +182,37 @@ const Dashboard: React.FC = () => {
   }, []);
 
 
-  // Get profit from localStorage
-  const getProfit = () => {
-    const profit = localStorage.getItem("businessProfit");
-    return profit ? parseFloat(profit) : 0;
-  };
+
+  // Fetch business profit from backend
+  const [businessProfit, setBusinessProfit] = useState(0);
+
+  useEffect(() => {
+    const fetchBusinessProfit = async () => {
+      const userId = localStorage.getItem("user_id");
+      if (!userId) {
+        setBusinessProfit(0);
+        return;
+      }
+
+      try {
+        const res = await fetch("http://127.0.0.1:8000/api/users-business-profit/", {
+          headers: { "user-id": userId }
+        });
+
+        if (!res.ok) throw new Error("Failed to fetch business profit");
+
+        const data = await res.json();
+        // Use total_profit from backend or sum entries if needed
+        const total = data.total_profit !== undefined ? data.total_profit : 0;
+        setBusinessProfit(total);
+      } catch (error) {
+        console.error("Error fetching business profit:", error);
+        setBusinessProfit(0);
+      }
+    };
+
+    fetchBusinessProfit();
+  }, []);
 
   // Calculate totals (convert backend types to frontend display)
   const totalCredit = transactions
@@ -197,7 +223,6 @@ const Dashboard: React.FC = () => {
     .filter((t) => t.type === "expense")
     .reduce((sum, t) => sum + t.amount, 0);
 
-  const businessProfit = getProfit();
   const totalBalance = totalCredit + businessProfit - totalDebit;
 
   const months = [

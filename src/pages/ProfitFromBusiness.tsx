@@ -4,6 +4,64 @@ import Sidebar from "../components/Sidebar";
 import { Plus, TrendingUp, X, Edit2, Trash2, DollarSign } from "lucide-react";
 import "../styles/Dashboard.css";
 
+async function fetchBusinessProfit() {
+  const userId = localStorage.getItem("user_id");
+
+  const res = await fetch(
+    "http://127.0.0.1:8000/api/users-business-profit/",
+    { headers: { "user-id": userId || "" } }
+  );
+
+  return await res.json();
+}
+
+async function addBusinessProfit(data: {
+  amount: number;
+  date: string;
+  details?: string;
+  category?: string;
+}) {
+  const userId = localStorage.getItem("user_id");
+
+  await fetch("http://127.0.0.1:8000/api/users-business-profit/", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "user-id": userId || ""
+    },
+    body: JSON.stringify(data)
+  });
+}
+
+async function updateBusinessProfit(id: string, data: {
+  amount: number;
+  date: string;
+  details?: string;
+  category?: string;
+}) {
+  const userId = localStorage.getItem("user_id");
+
+  await fetch(`http://127.0.0.1:8000/api/users-business-profit/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      "user-id": userId || ""
+    },
+    body: JSON.stringify(data)
+  });
+}
+
+async function deleteBusinessProfit(id: string) {
+  const userId = localStorage.getItem("user_id");
+
+  await fetch(`http://127.0.0.1:8000/api/users-business-profit/${id}`, {
+    method: "DELETE",
+    headers: {
+      "user-id": userId || ""
+    }
+  });
+}
+
 interface ProfitTransaction {
   id: string;
   details: string;
@@ -13,15 +71,13 @@ interface ProfitTransaction {
 }
 
 const ProfitFromBusiness: React.FC = () => {
-  const [transactions, setTransactions] = useState<ProfitTransaction[]>(() => {
-    const saved = localStorage.getItem("profitTransactions");
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [transactions, setTransactions] = useState<ProfitTransaction[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isSidebarOpen, setSidebarOpen] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [notification, setNotification] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
-  
+
   const [newTransaction, setNewTransaction] = useState({
     details: "",
     date: new Date().toISOString().split("T")[0],
@@ -34,11 +90,26 @@ const ProfitFromBusiness: React.FC = () => {
   // Calculate total profit
   const totalProfit = transactions.reduce((sum, t) => sum + t.amount, 0);
 
-  // Save to localStorage whenever transactions change
+  // Fetch profit data from backend on mount
   useEffect(() => {
-    localStorage.setItem("profitTransactions", JSON.stringify(transactions));
-    localStorage.setItem("businessProfit", totalProfit.toString());
-  }, [transactions, totalProfit]);
+    const loadData = async () => {
+      try {
+        const data = await fetchBusinessProfit();
+        const entries = Array.isArray(data.entries) ? data.entries : [];
+        // Map _id from backend to id for frontend
+        const mappedEntries = entries.map((e: any) => ({
+          ...e,
+          id: e._id || e.id
+        }));
+        setTransactions(mappedEntries);
+      } catch (error) {
+        console.error("Error fetching business profit:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, []);
 
   // Show notification
   const showNotification = (message: string) => {
@@ -46,30 +117,39 @@ const ProfitFromBusiness: React.FC = () => {
     setTimeout(() => setNotification(null), 3000);
   };
 
-  const handleAddTransaction = () => {
+  const handleAddTransaction = async () => {
     if (newTransaction.details.trim() && newTransaction.amount > 0) {
-      if (editingId) {
-        setTransactions(transactions.map(t => 
-          t.id === editingId ? { ...newTransaction, id: editingId } : t
-        ));
-        showNotification("Profit entry updated successfully!");
-        setEditingId(null);
-      } else {
-        const transaction = {
-          ...newTransaction,
-          id: Date.now().toString()
-        };
-        setTransactions([transaction, ...transactions]);
-        showNotification(`Profit of ₹${newTransaction.amount.toLocaleString()} added!`);
+      try {
+        if (editingId) {
+          await updateBusinessProfit(editingId, newTransaction);
+          setTransactions(transactions.map(t =>
+            t.id === editingId ? { ...newTransaction, id: editingId } : t
+          ));
+          showNotification("Profit entry updated successfully!");
+          setEditingId(null);
+        } else {
+          await addBusinessProfit(newTransaction);
+          const data = await fetchBusinessProfit();
+          const entries = Array.isArray(data.entries) ? data.entries : [];
+          const mappedEntries = entries.map((e: any) => ({
+            ...e,
+            id: e._id || e.id
+          }));
+          setTransactions(mappedEntries);
+          showNotification(`Profit of ₹${newTransaction.amount.toLocaleString()} added!`);
+        }
+
+        setNewTransaction({
+          details: "",
+          date: new Date().toISOString().split("T")[0],
+          amount: 0,
+          category: "Sales"
+        });
+        setShowModal(false);
+      } catch (error) {
+        console.error("Error saving profit entry:", error);
+        showNotification("Error saving profit entry. Please try again.");
       }
-      
-      setNewTransaction({
-        details: "",
-        date: new Date().toISOString().split("T")[0],
-        amount: 0,
-        category: "Sales"
-      });
-      setShowModal(false);
     }
   };
 
@@ -82,10 +162,16 @@ const ProfitFromBusiness: React.FC = () => {
     setShowModal(true);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm("Are you sure you want to delete this profit entry?")) {
-      setTransactions(transactions.filter(t => t.id !== id));
-      showNotification("Profit entry deleted successfully!");
+      try {
+        await deleteBusinessProfit(id);
+        setTransactions(transactions.filter(t => t.id !== id));
+        showNotification("Profit entry deleted successfully!");
+      } catch (error) {
+        console.error("Error deleting profit entry:", error);
+        showNotification("Error deleting profit entry. Please try again.");
+      }
     }
   };
 
@@ -174,7 +260,15 @@ const ProfitFromBusiness: React.FC = () => {
             </div>
 
             <div className="table-wrapper">
-              {transactions.length === 0 ? (
+              {loading ? (
+                <div className="empty-state-pro">
+                  <div className="empty-icon">
+                    <TrendingUp size={48} />
+                  </div>
+                  <h3>Loading profit entries...</h3>
+                  <p>Please wait while we fetch your data</p>
+                </div>
+              ) : transactions.length === 0 ? (
                 <div className="empty-state-pro">
                   <div className="empty-icon">
                     <TrendingUp size={48} />
@@ -205,8 +299,8 @@ const ProfitFromBusiness: React.FC = () => {
                           <span className="category-badge">{t.category || 'Other'}</span>
                         </td>
                         <td className="date-cell">
-                          {new Date(t.date).toLocaleDateString('en-US', { 
-                            month: 'short', 
+                          {new Date(t.date).toLocaleDateString('en-US', {
+                            month: 'short',
                             day: 'numeric',
                             year: 'numeric'
                           })}
@@ -216,15 +310,15 @@ const ProfitFromBusiness: React.FC = () => {
                         </td>
                         <td className="text-center">
                           <div className="action-buttons">
-                            <button 
-                              className="btn-icon edit" 
+                            <button
+                              className="btn-icon edit"
                               onClick={() => handleEdit(t)}
                               title="Edit"
                             >
                               <Edit2 size={16} />
                             </button>
-                            <button 
-                              className="btn-icon delete" 
+                            <button
+                              className="btn-icon delete"
                               onClick={() => handleDelete(t.id)}
                               title="Delete"
                             >
@@ -322,8 +416,8 @@ const ProfitFromBusiness: React.FC = () => {
               </div>
 
               <div className="modal-actions">
-                <button 
-                  className="btn-secondary" 
+                <button
+                  className="btn-secondary"
                   onClick={() => {
                     setShowModal(false);
                     setEditingId(null);

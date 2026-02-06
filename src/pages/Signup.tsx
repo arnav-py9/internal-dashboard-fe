@@ -34,7 +34,7 @@ const Signup: React.FC = () => {
       return;
     }
 
-    signup(email);
+    signup(email, data.user_id || data.id || data._id);
     navigate("/dashboard");
   };
 
