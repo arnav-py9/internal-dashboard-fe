@@ -8,7 +8,7 @@ async function fetchMonthlyExp(): Promise<number> {
   const userId = localStorage.getItem("user_id");
   if (!userId) return 1000;
 
-  const res = await fetch("/api/users-finances", {
+  const res = await fetch("/api/users-finances/", {
     headers: { "user-id": userId }
   });
 
