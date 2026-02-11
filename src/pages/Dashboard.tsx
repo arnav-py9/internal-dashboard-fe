@@ -8,7 +8,7 @@ async function fetchMonthlyExp(): Promise<number> {
   const userId = localStorage.getItem("user_id");
   if (!userId) return 1000;
 
-  const res = await fetch("http://localhost:8000/api/users-finances", {
+  const res = await fetch("/api/users-finances", {
     headers: { "user-id": userId }
   });
 
@@ -20,7 +20,7 @@ async function saveMonthlyExp(value: number): Promise<number> {
   const userId = localStorage.getItem("user_id");
   if (!userId) return value;
 
-  const res = await fetch("http://127.0.0.1:8000/api/users-finances/", {
+  const res = await fetch("/api/users-finances/", {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -39,7 +39,7 @@ async function fetchTransactions(): Promise<Transaction[]> {
   if (!userId) return [];
 
   try {
-    const res = await fetch("http://127.0.0.1:8000/api/users-transactions/", {
+    const res = await fetch("/api/users-transactions/", {
       headers: { "user-id": userId }
     });
 
@@ -63,7 +63,7 @@ async function createTransaction(transaction: {
   if (!userId) return null;
 
   try {
-    const res = await fetch("http://127.0.0.1:8000/api/users-transactions/", {
+    const res = await fetch("/api/users-transactions/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -93,7 +93,7 @@ async function updateTransaction(id: string, transaction: {
   if (!userId) return null;
 
   try {
-    const res = await fetch(`http://127.0.0.1:8000/api/users-transactions/${id}`, {
+    const res = await fetch(`/api/users-transactions/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -117,7 +117,7 @@ async function deleteTransaction(id: string): Promise<boolean> {
   if (!userId) return false;
 
   try {
-    const res = await fetch(`http://127.0.0.1:8000/api/users-transactions/${id}`, {
+    const res = await fetch(`/api/users-transactions/${id}`, {
       method: "DELETE",
       headers: {
         "user-id": userId
@@ -195,7 +195,7 @@ const Dashboard: React.FC = () => {
       }
 
       try {
-        const res = await fetch("http://127.0.0.1:8000/api/users-business-profit/", {
+        const res = await fetch("/api/users-business-profit/", {
           headers: { "user-id": userId }
         });
 

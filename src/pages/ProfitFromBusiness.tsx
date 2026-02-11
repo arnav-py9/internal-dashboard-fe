@@ -8,7 +8,7 @@ async function fetchBusinessProfit() {
   const userId = localStorage.getItem("user_id");
 
   const res = await fetch(
-    "http://127.0.0.1:8000/api/users-business-profit/",
+    "/api/users-business-profit/",
     { headers: { "user-id": userId || "" } }
   );
 
@@ -23,7 +23,7 @@ async function addBusinessProfit(data: {
 }) {
   const userId = localStorage.getItem("user_id");
 
-  await fetch("http://127.0.0.1:8000/api/users-business-profit/", {
+  await fetch("/api/users-business-profit/", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -41,7 +41,7 @@ async function updateBusinessProfit(id: string, data: {
 }) {
   const userId = localStorage.getItem("user_id");
 
-  await fetch(`http://127.0.0.1:8000/api/users-business-profit/${id}`, {
+  await fetch(`/api/users-business-profit/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -54,7 +54,7 @@ async function updateBusinessProfit(id: string, data: {
 async function deleteBusinessProfit(id: string) {
   const userId = localStorage.getItem("user_id");
 
-  await fetch(`http://127.0.0.1:8000/api/users-business-profit/${id}`, {
+  await fetch(`/api/users-business-profit/${id}`, {
     method: "DELETE",
     headers: {
       "user-id": userId || ""
