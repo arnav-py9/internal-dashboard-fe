@@ -158,6 +158,8 @@ const Dashboard: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [showBudgetModal, setShowBudgetModal] = useState(false);
+  const [budgetInput, setBudgetInput] = useState<number>(1000);
 
   const [newTransaction, setNewTransaction] = useState({
     details: "",
@@ -338,6 +340,20 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  const handleOpenBudgetModal = () => {
+    setBudgetInput(monthlyExp);
+    setShowBudgetModal(true);
+  };
+
+  const handleSaveBudget = async () => {
+    if (budgetInput > 0) {
+      const updated = await saveMonthlyExp(budgetInput);
+      setMonthlyExp(updated);
+      setShowBudgetModal(false);
+      showNotification("Monthly budget updated successfully!");
+    }
+  };
+
   const categories = ["Software Subscription", "Employee Cost", "Email Infra", "Cloud Infra", "Coaching", "Others"];
 
   return (
@@ -402,25 +418,19 @@ const Dashboard: React.FC = () => {
                     <div className="stat-icon-wrapper income">
                       <TrendingUp size={24} />
                     </div>
-                    <div className="monthly-exp-input">
-                      <input
-                        type="number"
-                        value={monthlyExp}
-                        className="exp-input"
-
-                        onChange={(e) => {
-                          setMonthlyExp(Number(e.target.value));
-                        }}
-
-                        onKeyDown={async (e) => {
-                          if (e.key === "Enter") {
-                            const updated = await saveMonthlyExp(monthlyExp);
-                            setMonthlyExp(updated);
-                          }
-                        }}
-                      />
-
-                      <span className="exp-label">per month</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <span style={{ fontSize: '1.2rem', color: 'white', fontWeight: '600' }}>₹{monthlyExp.toLocaleString()}</span>
+                        <span style={{ fontSize: '0.875rem', color: 'white', opacity: 0.7 }}>/mo</span>
+                      </div>
+                      <button
+                        className="btn-icon edit"
+                        onClick={handleOpenBudgetModal}
+                        title="Edit monthly budget"
+                        style={{ padding: '6px' }}
+                      >
+                        <Edit2 size={16} />
+                      </button>
                     </div>
                   </div>
                   <div className="stat-body">
@@ -684,6 +694,56 @@ const Dashboard: React.FC = () => {
                   }}
                 >
                   {editingId ? 'Update' : 'Add'} Transaction
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showBudgetModal && (
+        <div className="modal-overlay-pro" onClick={() => setShowBudgetModal(false)}>
+          <div className="modal-pro" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '450px' }}>
+            <div className="modal-header-pro">
+              <div>
+                <h2>Edit Monthly Budget</h2>
+                <p>Set your monthly spending limit</p>
+              </div>
+              <button className="modal-close-pro" onClick={() => setShowBudgetModal(false)}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="modal-body-pro">
+              <div className="form-field">
+                <label>Monthly Budget (₹)</label>
+                <input
+                  type="number"
+                  placeholder="Enter amount"
+                  value={budgetInput || ""}
+                  onChange={(e) => setBudgetInput(Number(e.target.value))}
+                  className="input-pro"
+                  autoFocus
+                />
+              </div>
+
+              <div className="modal-actions">
+                <button
+                  className="btn-secondary"
+                  onClick={() => setShowBudgetModal(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="btn-primary"
+                  onClick={handleSaveBudget}
+                  disabled={!budgetInput || budgetInput <= 0}
+                  style={{
+                    opacity: (!budgetInput || budgetInput <= 0) ? 0.5 : 1,
+                    cursor: (!budgetInput || budgetInput <= 0) ? 'not-allowed' : 'pointer'
+                  }}
+                >
+                  Save Budget
                 </button>
               </div>
             </div>
