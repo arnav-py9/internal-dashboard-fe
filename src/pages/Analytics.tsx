@@ -202,11 +202,13 @@ const Analytics: React.FC = () => {
                         <Tooltip
                           formatter={(value: number | undefined) => value !== undefined ? `₹${value.toLocaleString()}` : '₹0'}
                           contentStyle={{
-                            backgroundColor: '#1f2937',
-                            border: 'none',
+                            backgroundColor: '#1e1e2e',
+                            border: '1px solid rgba(255, 255, 255, 0.15)',
                             borderRadius: '8px',
                             color: '#fff'
                           }}
+                          itemStyle={{ color: '#fff' }}
+                          labelStyle={{ color: '#fff', fontWeight: 'bold' }}
                         />
                         <Legend
                           verticalAlign="bottom"
@@ -264,11 +266,13 @@ const Analytics: React.FC = () => {
                         <Tooltip
                           formatter={(value: number | undefined) => value !== undefined ? `₹${value.toLocaleString()}` : '₹0'}
                           contentStyle={{
-                            backgroundColor: '#1f2937',
-                            border: 'none',
+                            backgroundColor: '#1e1e2e',
+                            border: '1px solid rgba(255, 255, 255, 0.15)',
                             borderRadius: '8px',
                             color: '#fff'
                           }}
+                          itemStyle={{ color: '#fff' }}
+                          labelStyle={{ color: '#fff', fontWeight: 'bold' }}
                         />
                         <Legend
                           verticalAlign="bottom"

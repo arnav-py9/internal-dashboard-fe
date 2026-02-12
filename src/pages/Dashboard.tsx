@@ -168,7 +168,7 @@ const Dashboard: React.FC = () => {
     type: "Debit" as "Credit" | "Debit",
     date: new Date().toISOString().split("T")[0],
     amount: 0,
-    category: "Other",
+    category: "Software Subscription",
     payee: ""
   });
 
@@ -229,6 +229,15 @@ const Dashboard: React.FC = () => {
 
   const totalDebit = transactions
     .filter((t) => t.type === "expense")
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  const now = new Date();
+  const currentMonthDebit = transactions
+    .filter((t) => {
+      if (t.type !== "expense") return false;
+      const d = new Date(t.date);
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    })
     .reduce((sum, t) => sum + t.amount, 0);
 
   const totalBalance = totalCredit + businessProfit - totalDebit;
@@ -302,7 +311,7 @@ const Dashboard: React.FC = () => {
         type: "Debit",
         date: new Date().toISOString().split("T")[0],
         amount: 0,
-        category: "Other",
+        category: "Software Subscription",
         payee: ""
       });
       setShowModal(false);
@@ -317,7 +326,7 @@ const Dashboard: React.FC = () => {
       type: displayType,
       date: transaction.date,
       amount: transaction.amount,
-      category: transaction.category.charAt(0).toUpperCase() + transaction.category.slice(1),
+      category: transaction.category.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
       payee: transaction.payee || ""
     });
     setEditingId(transaction._id);
@@ -441,10 +450,10 @@ const Dashboard: React.FC = () => {
                     <div className="budget-bar">
                       <div
                         className="budget-fill"
-                        style={{ width: `${Math.min((totalDebit / monthlyExp) * 100, 100)}%` }}
+                        style={{ width: `${Math.min((currentMonthDebit / monthlyExp) * 100, 100)}%` }}
                       ></div>
                     </div>
-                    <p className="stat-detail">{Math.round((totalDebit / monthlyExp) * 100)}% utilized</p>
+                    <p className="stat-detail">{Math.round((currentMonthDebit / monthlyExp) * 100)}% utilized</p>
                   </div>
                 </div>
 
