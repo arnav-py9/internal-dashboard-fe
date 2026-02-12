@@ -59,6 +59,7 @@ async function createTransaction(transaction: {
   date: string;
   category: string;
   details: string;
+  payee?: string;
 }): Promise<Transaction | null> {
   const userId = localStorage.getItem("user_id");
   if (!userId) return null;
@@ -89,6 +90,7 @@ async function updateTransaction(id: string, transaction: {
   date: string;
   category: string;
   details: string;
+  payee?: string;
 }): Promise<Transaction | null> {
   const userId = localStorage.getItem("user_id");
   if (!userId) return null;
@@ -141,6 +143,7 @@ interface Transaction {
   date: string;
   amount: number;
   category: string;
+  payee?: string;
   created_at?: string;
   updated_at?: string;
 }
@@ -149,7 +152,6 @@ const Dashboard: React.FC = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isSidebarOpen, setSidebarOpen] = useState(true);
   const [monthlyExp, setMonthlyExp] = useState<number>(1000);
-  const [filterType, setFilterType] = useState("All");
   const [searchDetails, setSearchDetails] = useState("");
   const [filterMonth, setFilterMonth] = useState("All");
   const [showModal, setShowModal] = useState(false);
@@ -166,7 +168,8 @@ const Dashboard: React.FC = () => {
     type: "Debit" as "Credit" | "Debit",
     date: new Date().toISOString().split("T")[0],
     amount: 0,
-    category: "Other"
+    category: "Other",
+    payee: ""
   });
 
   const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);
@@ -245,13 +248,10 @@ const Dashboard: React.FC = () => {
 
   // Filter transactions
   const filtered = transactions.filter((t) => {
-    // Convert backend type to frontend type for filtering
-    const displayType = t.type === "income" ? "Credit" : "Debit";
-    const matchesType = filterType === "All" || displayType === filterType;
     const matchesSearch = t.details.toLowerCase().includes(searchDetails.toLowerCase());
     const transactionMonth = new Date(t.date).getMonth();
     const matchesMonth = filterMonth === "All" || filterMonth === "All Months" || months[transactionMonth] === filterMonth;
-    return matchesType && matchesSearch && matchesMonth;
+    return matchesSearch && matchesMonth;
   });
 
   // Show notification
@@ -270,7 +270,8 @@ const Dashboard: React.FC = () => {
         amount: newTransaction.amount,
         date: newTransaction.date,
         category: newTransaction.category.toLowerCase(),
-        details: newTransaction.details
+        details: newTransaction.details,
+        payee: newTransaction.payee || undefined
       };
 
       if (editingId) {
@@ -301,7 +302,8 @@ const Dashboard: React.FC = () => {
         type: "Debit",
         date: new Date().toISOString().split("T")[0],
         amount: 0,
-        category: "Other"
+        category: "Other",
+        payee: ""
       });
       setShowModal(false);
     }
@@ -315,7 +317,8 @@ const Dashboard: React.FC = () => {
       type: displayType,
       date: transaction.date,
       amount: transaction.amount,
-      category: transaction.category.charAt(0).toUpperCase() + transaction.category.slice(1)
+      category: transaction.category.charAt(0).toUpperCase() + transaction.category.slice(1),
+      payee: transaction.payee || ""
     });
     setEditingId(transaction._id);
     setShowModal(true);
@@ -479,15 +482,6 @@ const Dashboard: React.FC = () => {
                     </div>
                     <select
                       className="select-filter"
-                      value={filterType}
-                      onChange={(e) => setFilterType(e.target.value)}
-                    >
-                      <option>All</option>
-                      <option>Credit</option>
-                      <option>Debit</option>
-                    </select>
-                    <select
-                      className="select-filter"
                       value={filterMonth}
                       onChange={(e) => setFilterMonth(e.target.value)}
                     >
@@ -518,7 +512,7 @@ const Dashboard: React.FC = () => {
                         <tr>
                           <th>Details</th>
                           <th>Category</th>
-                          <th>Type</th>
+                          <th>Payee</th>
                           <th>Date</th>
                           <th style={{ textAlign: 'right' }}>Amount</th>
                           <th style={{ textAlign: 'center' }}>Actions</th>
@@ -534,10 +528,11 @@ const Dashboard: React.FC = () => {
                                 <span className="category-badge">{t.category.charAt(0).toUpperCase() + t.category.slice(1)}</span>
                               </td>
                               <td>
-                                <span className={`badge-pro ${displayType.toLowerCase()}`}>
-                                  {displayType === "Credit" ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
-                                  {displayType}
-                                </span>
+                                {t.payee ? (
+                                  <span className="category-badge">{t.payee}</span>
+                                ) : (
+                                  <span style={{ color: '#888', fontSize: '0.875rem' }}>-</span>
+                                )}
                               </td>
                               <td className="date-cell">
                                 {new Date(t.date).toLocaleDateString('en-US', {
@@ -547,7 +542,7 @@ const Dashboard: React.FC = () => {
                                 })}
                               </td>
                               <td className={`amount-cell ${displayType.toLowerCase()}`} style={{ textAlign: 'right' }}>
-                                {displayType === "Credit" ? "+" : "-"}₹{t.amount.toLocaleString()}
+                                ₹{t.amount.toLocaleString()}
                               </td>
                               <td style={{ textAlign: 'center' }}>
                                 <div className="action-buttons">
@@ -631,19 +626,18 @@ const Dashboard: React.FC = () => {
                   </select>
                 </div>
                 <div className="form-field">
-                  <label>Type</label>
+                  <label>Payee</label>
                   <select
-                    value={newTransaction.type}
+                    value={newTransaction.payee}
                     onChange={(e) =>
-                      setNewTransaction({
-                        ...newTransaction,
-                        type: e.target.value as "Credit" | "Debit",
-                      })
+                      setNewTransaction({ ...newTransaction, payee: e.target.value })
                     }
                     className="input-pro"
                   >
-                    <option>Credit</option>
-                    <option>Debit</option>
+                    <option value="">Select Payee</option>
+                    <option value="Utkarsh">Utkarsh</option>
+                    <option value="Umang">Umang</option>
+                    <option value="Business">Business</option>
                   </select>
                 </div>
               </div>
