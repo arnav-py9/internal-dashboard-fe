@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import ProfitFromBusiness from "./pages/ProfitFromBusiness";
+import InvestmentsReimbursements from "./pages/InvestmentsReimbursements";
 import Signup from "./pages/Signup";
 
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
@@ -26,13 +27,21 @@ const App: React.FC = () => (
             </PrivateRoute>
           } 
         />
-        <Route 
-          path="/profit" 
+        <Route
+          path="/profit"
           element={
             <PrivateRoute>
               <ProfitFromBusiness />
             </PrivateRoute>
-          } 
+          }
+        />
+        <Route
+          path="/investments"
+          element={
+            <PrivateRoute>
+              <InvestmentsReimbursements />
+            </PrivateRoute>
+          }
         />
       </Routes>
     </Router>
