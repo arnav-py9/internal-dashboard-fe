@@ -329,7 +329,7 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const categories = ["Salary", "Food", "Transport", "Shopping", "Bills", "Entertainment", "Health", "Other"];
+  const categories = ["Software Subscription", "Employee Cost", "Email Infra", "Cloud Infra", "Coaching", "Others"];
 
   return (
     <div className="dashboard">

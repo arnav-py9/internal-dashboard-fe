@@ -175,7 +175,7 @@ const ProfitFromBusiness: React.FC = () => {
     }
   };
 
-  const categories = ["Sales", "Services", "Investment", "Commission", "Other"];
+  const categories = ["Content-FB", "Content-Known", "Software-Known", "Content-Cold"];
 
   // Calculate stats
   const thisMonthProfit = transactions
