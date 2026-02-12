@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import ConfirmModal from "../components/ConfirmModal";
-import { Plus, TrendingUp, X, Edit2, Trash2, DollarSign } from "lucide-react";
+import { Plus, TrendingUp, X, Edit2, Trash2, DollarSign, Wallet } from "lucide-react";
 import "../styles/Dashboard.css";
 
 async function fetchBusinessProfit() {
@@ -14,6 +14,24 @@ async function fetchBusinessProfit() {
   );
 
   return await res.json();
+}
+
+async function fetchTransactions() {
+  const userId = localStorage.getItem("user_id");
+  if (!userId) return [];
+
+  try {
+    const res = await fetch("/api/users-transactions/", {
+      headers: { "user-id": userId }
+    });
+
+    if (!res.ok) throw new Error("Failed to fetch transactions");
+    const data = await res.json();
+    return data;
+  } catch (error) {
+    console.error("Error fetching transactions:", error);
+    return [];
+  }
 }
 
 async function addBusinessProfit(data: {
@@ -71,8 +89,20 @@ interface ProfitTransaction {
   category?: string;
 }
 
+interface GeneralTransaction {
+  _id: string;
+  user_id: string;
+  details: string;
+  type: "income" | "expense";
+  date: string;
+  amount: number;
+  category: string;
+  payee?: string;
+}
+
 const ProfitFromBusiness: React.FC = () => {
   const [transactions, setTransactions] = useState<ProfitTransaction[]>([]);
+  const [generalTransactions, setGeneralTransactions] = useState<GeneralTransaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSidebarOpen, setSidebarOpen] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -93,20 +123,35 @@ const ProfitFromBusiness: React.FC = () => {
   // Calculate total profit
   const totalProfit = transactions.reduce((sum, t) => sum + t.amount, 0);
 
-  // Fetch profit data from backend on mount
+  // Calculate total amount funded (expenses where payee is not Utkarsh or Umang)
+  const totalAmountFunded = generalTransactions
+    .filter(t =>
+      t.type === "expense" &&
+      t.payee &&
+      t.payee.toLowerCase() !== "utkarsh" &&
+      t.payee.toLowerCase() !== "umang"
+    )
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  // Fetch profit data and general transactions from backend on mount
   useEffect(() => {
     const loadData = async () => {
       try {
-        const data = await fetchBusinessProfit();
-        const entries = Array.isArray(data.entries) ? data.entries : [];
+        const [profitData, generalTxns] = await Promise.all([
+          fetchBusinessProfit(),
+          fetchTransactions()
+        ]);
+
+        const entries = Array.isArray(profitData.entries) ? profitData.entries : [];
         // Map _id from backend to id for frontend
         const mappedEntries = entries.map((e: any) => ({
           ...e,
           id: e._id || e.id
         }));
         setTransactions(mappedEntries);
+        setGeneralTransactions(generalTxns);
       } catch (error) {
-        console.error("Error fetching business profit:", error);
+        console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
       }
@@ -257,6 +302,20 @@ const ProfitFromBusiness: React.FC = () => {
                 <p className="stat-label">Average Per Entry</p>
                 <h2 className="stat-amount">₹{Math.round(avgProfit).toLocaleString()}</h2>
                 <p className="stat-detail">Mean profit value</p>
+              </div>
+            </div>
+
+            <div className="stat-card-pro debit-card">
+              <div className="stat-header">
+                <div className="stat-icon-wrapper debit">
+                  <Wallet size={24} />
+                </div>
+                <span className="stat-badge">Business expenses</span>
+              </div>
+              <div className="stat-body">
+                <p className="stat-label">Total Amount Funded</p>
+                <h2 className="stat-amount">₹{totalAmountFunded.toLocaleString()}</h2>
+                <p className="stat-detail">Transactions funded by Business</p>
               </div>
             </div>
           </div>

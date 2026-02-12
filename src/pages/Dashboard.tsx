@@ -396,7 +396,7 @@ const Dashboard: React.FC = () => {
                   <div className="stat-body">
                     <p className="stat-label">Total Expenses</p>
                     <h2 className="stat-amount">₹{totalDebit.toLocaleString()}</h2>
-                    <p className="stat-detail">This month's spending</p>
+                    <p className="stat-detail">Total Transactions Value</p>
                   </div>
                 </div>
 
