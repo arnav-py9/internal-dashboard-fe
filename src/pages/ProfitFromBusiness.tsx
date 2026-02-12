@@ -115,7 +115,7 @@ const ProfitFromBusiness: React.FC = () => {
     details: "",
     date: new Date().toISOString().split("T")[0],
     amount: 0,
-    category: "Sales"
+    category: "Content-FB"
   });
 
   const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);
@@ -191,7 +191,7 @@ const ProfitFromBusiness: React.FC = () => {
           details: "",
           date: new Date().toISOString().split("T")[0],
           amount: 0,
-          category: "Sales"
+          category: "Content-FB"
         });
         setShowModal(false);
       } catch (error) {
@@ -204,7 +204,7 @@ const ProfitFromBusiness: React.FC = () => {
   const handleEdit = (transaction: ProfitTransaction) => {
     setNewTransaction({
       ...transaction,
-      category: transaction.category || 'Other'
+      category: transaction.category || 'Content-FB'
     });
     setEditingId(transaction.id);
     setShowModal(true);
