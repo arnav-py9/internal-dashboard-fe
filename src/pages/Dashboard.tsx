@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
+import ConfirmModal from "../components/ConfirmModal";
 import { Plus, TrendingDown, TrendingUp, Wallet, Calendar, X, Search, Edit2, Trash2 } from "lucide-react";
 import "../styles/Dashboard.css";
 
@@ -155,6 +156,8 @@ const Dashboard: React.FC = () => {
   const [notification, setNotification] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const [newTransaction, setNewTransaction] = useState({
     details: "",
@@ -316,9 +319,14 @@ const Dashboard: React.FC = () => {
     setShowModal(true);
   };
 
-  const handleDelete = async (id: string) => {
-    if (window.confirm("Are you sure you want to delete this transaction?")) {
-      const success = await deleteTransaction(id);
+  const handleDelete = (id: string) => {
+    setDeleteId(id);
+    setShowConfirmModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (deleteId) {
+      const success = await deleteTransaction(deleteId);
       if (success) {
         const updatedTransactions = await fetchTransactions();
         setTransactions(updatedTransactions);
@@ -326,6 +334,7 @@ const Dashboard: React.FC = () => {
       } else {
         showNotification("Failed to delete transaction");
       }
+      setDeleteId(null);
     }
   };
 
@@ -690,6 +699,20 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={showConfirmModal}
+        title="Delete Transaction"
+        message="Are you sure you want to delete this transaction? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        onConfirm={confirmDelete}
+        onCancel={() => {
+          setShowConfirmModal(false);
+          setDeleteId(null);
+        }}
+        type="danger"
+      />
     </div>
   );
 };

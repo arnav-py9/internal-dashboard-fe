@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
+import ConfirmModal from "../components/ConfirmModal";
 import { Plus, TrendingUp, X, Edit2, Trash2, DollarSign } from "lucide-react";
 import "../styles/Dashboard.css";
 
@@ -77,6 +78,8 @@ const ProfitFromBusiness: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
   const [notification, setNotification] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const [newTransaction, setNewTransaction] = useState({
     details: "",
@@ -162,16 +165,22 @@ const ProfitFromBusiness: React.FC = () => {
     setShowModal(true);
   };
 
-  const handleDelete = async (id: string) => {
-    if (window.confirm("Are you sure you want to delete this profit entry?")) {
+  const handleDelete = (id: string) => {
+    setDeleteId(id);
+    setShowConfirmModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (deleteId) {
       try {
-        await deleteBusinessProfit(id);
-        setTransactions(transactions.filter(t => t.id !== id));
+        await deleteBusinessProfit(deleteId);
+        setTransactions(transactions.filter(t => t.id !== deleteId));
         showNotification("Profit entry deleted successfully!");
       } catch (error) {
         console.error("Error deleting profit entry:", error);
         showNotification("Error deleting profit entry. Please try again.");
       }
+      setDeleteId(null);
     }
   };
 
@@ -443,6 +452,20 @@ const ProfitFromBusiness: React.FC = () => {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={showConfirmModal}
+        title="Delete Profit Entry"
+        message="Are you sure you want to delete this profit entry? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        onConfirm={confirmDelete}
+        onCancel={() => {
+          setShowConfirmModal(false);
+          setDeleteId(null);
+        }}
+        type="danger"
+      />
     </div>
   );
 };
