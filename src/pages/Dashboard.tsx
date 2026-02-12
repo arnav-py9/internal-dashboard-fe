@@ -241,7 +241,11 @@ const Dashboard: React.FC = () => {
     })
     .reduce((sum, t) => sum + t.amount, 0);
 
-  const totalBalance = totalCredit + businessProfit - totalDebit;
+  const businessPaidDebit = transactions
+    .filter((t) => t.type === "expense" && t.payee === "Business")
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  const totalBalance = totalCredit + businessProfit - businessPaidDebit;
 
   const months = [
     "January", "February", "March", "April", "May", "June",
