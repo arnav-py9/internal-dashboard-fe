@@ -160,6 +160,7 @@ const Dashboard: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
   const [showBudgetModal, setShowBudgetModal] = useState(false);
   const [budgetInput, setBudgetInput] = useState<number>(1000);
 
@@ -271,6 +272,7 @@ const Dashboard: React.FC = () => {
 
   const handleAddTransaction = async () => {
     if (newTransaction.details.trim() && newTransaction.amount > 0) {
+      setIsSaving(true);
       // Convert UI type (Credit/Debit) to API type (income/expense)
       const apiType = newTransaction.type === "Credit" ? "income" : "expense";
 
@@ -283,38 +285,42 @@ const Dashboard: React.FC = () => {
         payee: newTransaction.payee || undefined
       };
 
-      if (editingId) {
-        const updated = await updateTransaction(editingId, transactionData);
-        if (updated) {
-          const updatedTransactions = await fetchTransactions();
-          setTransactions(updatedTransactions);
-          showNotification("Transaction updated successfully!");
-          setEditingId(null);
+      try {
+        if (editingId) {
+          const updated = await updateTransaction(editingId, transactionData);
+          if (updated) {
+            const updatedTransactions = await fetchTransactions();
+            setTransactions(updatedTransactions);
+            showNotification("Transaction updated successfully!");
+            setEditingId(null);
+          } else {
+            showNotification("Failed to update transaction");
+            return;
+          }
         } else {
-          showNotification("Failed to update transaction");
-          return;
+          const created = await createTransaction(transactionData);
+          if (created) {
+            const updatedTransactions = await fetchTransactions();
+            setTransactions(updatedTransactions);
+            showNotification(`${newTransaction.type} of ₹${newTransaction.amount.toLocaleString()} added!`);
+          } else {
+            showNotification("Failed to add transaction");
+            return;
+          }
         }
-      } else {
-        const created = await createTransaction(transactionData);
-        if (created) {
-          const updatedTransactions = await fetchTransactions();
-          setTransactions(updatedTransactions);
-          showNotification(`${newTransaction.type} of ₹${newTransaction.amount.toLocaleString()} added!`);
-        } else {
-          showNotification("Failed to add transaction");
-          return;
-        }
-      }
 
-      setNewTransaction({
-        details: "",
-        type: "Debit",
-        date: new Date().toISOString().split("T")[0],
-        amount: 0,
-        category: "Software Subscription",
-        payee: ""
-      });
-      setShowModal(false);
+        setNewTransaction({
+          details: "",
+          type: "Debit",
+          date: new Date().toISOString().split("T")[0],
+          amount: 0,
+          category: "Software Subscription",
+          payee: ""
+        });
+        setShowModal(false);
+      } finally {
+        setIsSaving(false);
+      }
     }
   };
 
@@ -690,13 +696,13 @@ const Dashboard: React.FC = () => {
                 <button
                   className="btn-primary"
                   onClick={handleAddTransaction}
-                  disabled={!newTransaction.details.trim() || newTransaction.amount <= 0 || !newTransaction.date}
+                  disabled={isSaving || !newTransaction.details.trim() || newTransaction.amount <= 0 || !newTransaction.date}
                   style={{
-                    opacity: (!newTransaction.details.trim() || newTransaction.amount <= 0 || !newTransaction.date) ? 0.5 : 1,
-                    cursor: (!newTransaction.details.trim() || newTransaction.amount <= 0 || !newTransaction.date) ? 'not-allowed' : 'pointer'
+                    opacity: (isSaving || !newTransaction.details.trim() || newTransaction.amount <= 0 || !newTransaction.date) ? 0.5 : 1,
+                    cursor: (isSaving || !newTransaction.details.trim() || newTransaction.amount <= 0 || !newTransaction.date) ? 'not-allowed' : 'pointer'
                   }}
                 >
-                  {editingId ? 'Update' : 'Add'} Transaction
+                  {isSaving ? 'Saving...' : `${editingId ? 'Update' : 'Add'} Transaction`}
                 </button>
               </div>
             </div>
