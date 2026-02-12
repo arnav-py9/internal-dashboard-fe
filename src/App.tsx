@@ -5,6 +5,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import ProfitFromBusiness from "./pages/ProfitFromBusiness";
 import InvestmentsReimbursements from "./pages/InvestmentsReimbursements";
+import Analytics from "./pages/Analytics";
 import Signup from "./pages/Signup";
 
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
@@ -40,6 +41,14 @@ const App: React.FC = () => (
           element={
             <PrivateRoute>
               <InvestmentsReimbursements />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/analytics"
+          element={
+            <PrivateRoute>
+              <Analytics />
             </PrivateRoute>
           }
         />

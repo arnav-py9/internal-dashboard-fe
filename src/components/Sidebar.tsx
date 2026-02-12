@@ -1,11 +1,11 @@
 import React from "react";
-import { DollarSign, TrendingUp, HandCoins } from "lucide-react";
+import { DollarSign, TrendingUp, HandCoins, BarChart3 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Sidebar.css";
 
 interface SidebarProps {
   isOpen: boolean;
-  currentPage: "transactions" | "profit" | "investments";
+  currentPage: "transactions" | "profit" | "investments" | "analytics";
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentPage }) => {
@@ -34,6 +34,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentPage }) => {
         >
           <HandCoins size={20} />
           <span className="sidebar-text">Investments & Salaries</span>
+        </li>
+        <li
+          className={`sidebar-item ${currentPage === "analytics" ? "active" : ""}`}
+          onClick={() => navigate("/analytics")}
+        >
+          <BarChart3 size={20} />
+          <span className="sidebar-text">Analytics</span>
         </li>
       </ul>
     </aside>
