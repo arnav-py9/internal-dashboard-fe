@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
-import { BarChart3, TrendingUp } from "lucide-react";
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, LineChart, Line, XAxis, YAxis, CartesianGrid } from "recharts";
+import { BarChart3, TrendingUp, Activity } from "lucide-react";
 import "../styles/Dashboard.css";
 
 interface Transaction {
@@ -108,8 +108,28 @@ const Analytics: React.FC = () => {
       .sort((a, b) => b.value - a.value);
   };
 
+  // Cumulative revenue (income) over time — grouped by month, sorted, then cumulative sum
+  const getCumulativeRevenueOverTime = () => {
+    const incomeByMonth = new Map<string, number>();
+    transactions
+      .filter((t) => t.type === "income")
+      .forEach((t) => {
+        const month = t.date.slice(0, 7); // YYYY-MM
+        incomeByMonth.set(month, (incomeByMonth.get(month) ?? 0) + t.amount);
+      });
+    const sorted = Array.from(incomeByMonth.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([period, revenue]) => ({ period, revenue }));
+    let cumulative = 0;
+    return sorted.map(({ period, revenue }) => {
+      cumulative += revenue;
+      return { period, revenue, cumulative };
+    });
+  };
+
   const transactionCategoriesData = getTransactionCategoriesData();
   const businessProfitCategoriesData = getBusinessProfitByCategory();
+  const cumulativeRevenueData = getCumulativeRevenueOverTime();
 
   // Colors for pie charts
   const COLORS = [
@@ -293,6 +313,77 @@ const Analytics: React.FC = () => {
                     </div>
                   )}
                 </div>
+              </div>
+
+              {/* Cumulative Revenue Over Time */}
+              <div className="stat-card-pro" style={{ padding: "24px", marginTop: "24px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" }}>
+                  <div className="stat-icon-wrapper income">
+                    <Activity size={24} />
+                  </div>
+                  <div>
+                    <h2 style={{ fontSize: "1.25rem", fontWeight: "600", margin: 0, color: "white" }}>
+                      Cumulative Revenue Over Time
+                    </h2>
+                    <p style={{ fontSize: "0.875rem", color: "white", margin: "4px 0 0 0" }}>
+                      Running total of income by month
+                    </p>
+                  </div>
+                </div>
+
+                {cumulativeRevenueData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={320}>
+                    <LineChart data={cumulativeRevenueData} margin={{ top: 8, right: 24, left: 8, bottom: 8 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                      <XAxis
+                        dataKey="period"
+                        stroke="rgba(255,255,255,0.6)"
+                        tick={{ fill: "rgba(255,255,255,0.8)", fontSize: 12 }}
+                        tickFormatter={(v) => {
+                          const [y, m] = v.split("-");
+                          return `${m}/${y.slice(2)}`;
+                        }}
+                      />
+                      <YAxis
+                        stroke="rgba(255,255,255,0.6)"
+                        tick={{ fill: "rgba(255,255,255,0.8)", fontSize: 12 }}
+                        tickFormatter={(v) => `₹${v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v}`}
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: "#1e1e2e",
+                          border: "1px solid rgba(255, 255, 255, 0.15)",
+                          borderRadius: "8px",
+                          color: "#fff"
+                        }}
+                        labelStyle={{ color: "#fff", fontWeight: "bold" }}
+                        formatter={(value: number | undefined) => [`₹${(value ?? 0).toLocaleString()}`, "Cumulative"]}
+                        labelFormatter={(label) => `Month: ${label}`}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="cumulative"
+                        name="Cumulative revenue"
+                        stroke="#10B981"
+                        strokeWidth={2}
+                        dot={{ fill: "#10B981", strokeWidth: 0 }}
+                        activeDot={{ r: 6, fill: "#10B981", stroke: "#fff", strokeWidth: 2 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div
+                    style={{
+                      height: "320px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "white"
+                    }}
+                  >
+                    No income data available for cumulative revenue
+                  </div>
+                )}
               </div>
 
               {/* Summary Stats */}
