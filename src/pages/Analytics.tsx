@@ -108,28 +108,26 @@ const Analytics: React.FC = () => {
       .sort((a, b) => b.value - a.value);
   };
 
-  // Cumulative revenue (income) over time — grouped by month, sorted, then cumulative sum
-  const getCumulativeRevenueOverTime = () => {
-    const incomeByMonth = new Map<string, number>();
-    transactions
-      .filter((t) => t.type === "income")
-      .forEach((t) => {
-        const month = t.date.slice(0, 7); // YYYY-MM
-        incomeByMonth.set(month, (incomeByMonth.get(month) ?? 0) + t.amount);
-      });
-    const sorted = Array.from(incomeByMonth.entries())
+  // Cumulative business profit (revenue) over time — from user business profits
+  const getCumulativeBusinessProfitOverTime = () => {
+    const byDate = new Map<string, number>();
+    businessProfitData.entries.forEach((entry) => {
+      const d = entry.date.slice(0, 10); // YYYY-MM-DD
+      byDate.set(d, (byDate.get(d) ?? 0) + entry.amount);
+    });
+    const sorted = Array.from(byDate.entries())
       .sort(([a], [b]) => a.localeCompare(b))
-      .map(([period, revenue]) => ({ period, revenue }));
+      .map(([date, amount]) => ({ date, amount }));
     let cumulative = 0;
-    return sorted.map(({ period, revenue }) => {
-      cumulative += revenue;
-      return { period, revenue, cumulative };
+    return sorted.map(({ date, amount }) => {
+      cumulative += amount;
+      return { date, value: cumulative };
     });
   };
 
   const transactionCategoriesData = getTransactionCategoriesData();
   const businessProfitCategoriesData = getBusinessProfitByCategory();
-  const cumulativeRevenueData = getCumulativeRevenueOverTime();
+  const cumulativeData = getCumulativeBusinessProfitOverTime();
 
   // Colors for pie charts
   const COLORS = [
@@ -326,22 +324,22 @@ const Analytics: React.FC = () => {
                       Cumulative Revenue Over Time
                     </h2>
                     <p style={{ fontSize: "0.875rem", color: "white", margin: "4px 0 0 0" }}>
-                      Running total of income by month
+                      Running total of business profit (your revenue) by date
                     </p>
                   </div>
                 </div>
 
-                {cumulativeRevenueData.length > 0 ? (
+                {cumulativeData.length > 0 ? (
                   <ResponsiveContainer width="100%" height={320}>
-                    <LineChart data={cumulativeRevenueData} margin={{ top: 8, right: 24, left: 8, bottom: 8 }}>
+                    <LineChart data={cumulativeData} margin={{ top: 8, right: 24, left: 8, bottom: 8 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
                       <XAxis
-                        dataKey="period"
+                        dataKey="date"
                         stroke="rgba(255,255,255,0.6)"
                         tick={{ fill: "rgba(255,255,255,0.8)", fontSize: 12 }}
                         tickFormatter={(v) => {
-                          const [y, m] = v.split("-");
-                          return `${m}/${y.slice(2)}`;
+                          const [y, m, d] = v.split("-");
+                          return `${d}/${m}/${y.slice(2)}`;
                         }}
                       />
                       <YAxis
@@ -357,13 +355,13 @@ const Analytics: React.FC = () => {
                           color: "#fff"
                         }}
                         labelStyle={{ color: "#fff", fontWeight: "bold" }}
-                        formatter={(value: number | undefined) => [`₹${(value ?? 0).toLocaleString()}`, "Cumulative"]}
-                        labelFormatter={(label) => `Month: ${label}`}
+                        formatter={(value: number | undefined) => [`₹${(value ?? 0).toLocaleString()}`, "Cumulative value"]}
+                        labelFormatter={(label) => `Date: ${label}`}
                       />
                       <Line
                         type="monotone"
-                        dataKey="cumulative"
-                        name="Cumulative revenue"
+                        dataKey="value"
+                        name="Cumulative business profit"
                         stroke="#10B981"
                         strokeWidth={2}
                         dot={{ fill: "#10B981", strokeWidth: 0 }}
@@ -381,7 +379,7 @@ const Analytics: React.FC = () => {
                       color: "white"
                     }}
                   >
-                    No income data available for cumulative revenue
+                    No cumulative data found. Add business profit entries to see your revenue grow over time.
                   </div>
                 )}
               </div>
