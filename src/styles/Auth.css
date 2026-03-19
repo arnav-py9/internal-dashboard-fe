@@ -27,43 +27,27 @@ html, body {
   position: relative;
   overflow: hidden;
   padding: 20px;
+  background: var(--bg-surface);
 }
 
-/* Animated Gradient Background */
 .gradient-bg {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(-45deg, #0f0f23, #1a1a2e, #16213e, #0f3460);
-  background-size: 400% 400%;
-  animation: gradient 15s ease infinite;
+  background: linear-gradient(135deg, var(--brand-white) 0%, #edf3ff 100%);
   z-index: 0;
 }
 
-@keyframes gradient {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
-/* Floating Elements */
 .floating-circle-1 {
   position: absolute;
   width: 400px;
   height: 400px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(147, 51, 234, 0.3) 0%, rgba(147, 51, 234, 0) 70%);
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.14) 0%, rgba(37, 99, 235, 0) 70%);
   top: -100px;
   right: -100px;
-  animation: float 8s ease-in-out infinite;
   z-index: 1;
 }
 
@@ -72,56 +56,22 @@ html, body {
   width: 300px;
   height: 300px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(59, 130, 246, 0.3) 0%, rgba(59, 130, 246, 0) 70%);
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.18) 0%, rgba(37, 99, 235, 0) 70%);
   bottom: -50px;
   left: -50px;
-  animation: floatReverse 10s ease-in-out infinite;
   z-index: 1;
 }
 
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-20px);
-  }
-}
-
-@keyframes floatReverse {
-  0%, 100% {
-    transform: translateY(0px) translateX(0px);
-  }
-  50% {
-    transform: translateY(20px) translateX(-10px);
-  }
-}
-
-/* Auth Card */
 .auth-card {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: var(--brand-white);
   border-radius: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-medium);
   width: 100%;
   max-width: 460px;
   padding: 48px 40px;
   position: relative;
   z-index: 2;
-  animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0.96) translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
 }
 
 /* Auth Header */
@@ -131,27 +81,23 @@ html, body {
 }
 
 .app-logo {
-  font-size: 24px;
-  font-weight: 700;
-  background: linear-gradient(135deg, #9333ea 0%, #3b82f6 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
   margin-bottom: 16px;
-  letter-spacing: -0.02em;
 }
 
 .auth-title {
   font-size: 32px;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--text-primary);
   margin-bottom: 8px;
   letter-spacing: -0.02em;
 }
 
 .auth-subtitle {
   font-size: 15px;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--text-secondary);
 }
 
 /* Toggle Container */
@@ -159,7 +105,7 @@ html, body {
   display: flex;
   gap: 8px;
   margin-bottom: 32px;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--bg-muted);
   border-radius: 12px;
   padding: 6px;
 }
@@ -174,13 +120,13 @@ html, body {
   cursor: pointer;
   border-radius: 8px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--text-muted);
 }
 
 .toggle-btn.active {
-  background: linear-gradient(135deg, #9333ea 0%, #7c3aed 100%);
-  color: #ffffff;
-  box-shadow: 0 4px 12px rgba(147, 51, 234, 0.4);
+  background: var(--brand-blue);
+  color: var(--text-on-accent);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
 /* Form Styles */
@@ -196,25 +142,10 @@ html, body {
   gap: 8px;
 }
 
-.form-group.slide-down {
-  animation: slideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 .form-label {
   font-size: 14px;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--text-secondary);
   margin-left: 4px;
 }
 
@@ -227,7 +158,7 @@ html, body {
 .input-icon {
   position: absolute;
   left: 16px;
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--text-muted);
   pointer-events: none;
 }
 
@@ -235,24 +166,24 @@ html, body {
   width: 100%;
   padding: 14px 16px 14px 48px;
   font-size: 15px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-color);
   border-radius: 10px;
   outline: none;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  background: rgba(255, 255, 255, 0.05);
-  color: #ffffff;
+  background: var(--brand-white);
+  color: var(--text-primary);
   font-family: inherit;
 }
 
 .form-input::placeholder {
-  color: rgba(255, 255, 255, 0.3);
+  color: var(--text-muted);
 }
 
 .form-input:focus {
-  border-color: rgba(147, 51, 234, 0.5);
-  box-shadow: 0 0 0 4px rgba(147, 51, 234, 0.1);
+  border-color: rgba(37, 99, 235, 0.5);
+  box-shadow: 0 0 0 4px var(--focus-ring);
   transform: translateY(-1px);
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--brand-white);
 }
 
 /* Forgot Password */
@@ -262,7 +193,7 @@ html, body {
 }
 
 .forgot-link {
-  color: #a78bfa;
+  color: var(--brand-blue);
   text-decoration: none;
   font-size: 14px;
   font-weight: 500;
@@ -278,8 +209,8 @@ html, body {
 .submit-btn {
   width: 100%;
   padding: 14px 24px;
-  background: linear-gradient(135deg, #9333ea 0%, #7c3aed 100%);
-  color: white;
+  background: var(--brand-blue);
+  color: var(--text-on-accent);
   border: none;
   border-radius: 10px;
   font-size: 16px;
@@ -291,12 +222,12 @@ html, body {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  box-shadow: 0 4px 12px rgba(147, 51, 234, 0.3);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
 .submit-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(147, 51, 234, 0.4);
+  box-shadow: 0 8px 22px rgba(37, 99, 235, 0.35);
 }
 
 .submit-btn:active {
@@ -316,16 +247,16 @@ html, body {
   text-align: center;
   margin-top: 24px;
   padding-top: 24px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid var(--border-color);
 }
 
 .footer-text {
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--text-secondary);
 }
 
 .footer-link {
-  color: #a78bfa;
+  color: var(--brand-blue);
   text-decoration: none;
   font-weight: 600;
   cursor: pointer;
@@ -338,13 +269,13 @@ html, body {
 
 /* Error Text */
 .error-text {
-  color: #f87171;
+  color: var(--brand-charcoal);
   font-size: 14px;
   text-align: center;
   padding: 12px;
-  background: rgba(248, 113, 113, 0.1);
+  background: var(--bg-hover);
   border-radius: 8px;
-  border: 1px solid rgba(248, 113, 113, 0.2);
+  border: 1px solid rgba(37, 99, 235, 0.24);
 }
 
 /* Responsive Design */

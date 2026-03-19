@@ -8,18 +8,18 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
-    const saved = localStorage.getItem("theme");
-    return saved ? saved === "dark" : true;
-  });
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
 
   useEffect(() => {
-    localStorage.setItem("theme", isDarkMode ? "dark" : "light");
-    document.documentElement.setAttribute("data-theme", isDarkMode ? "dark" : "light");
+    localStorage.setItem("theme", "light");
+    document.documentElement.setAttribute("data-theme", "light");
+    if (isDarkMode) {
+      setIsDarkMode(false);
+    }
   }, [isDarkMode]);
 
   const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
+    setIsDarkMode(false);
   };
 
   return (

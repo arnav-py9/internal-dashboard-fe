@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { Mail, Lock, ArrowRight } from "lucide-react";
 import "../styles/Auth.css";
+import logo from "../assets/logo.png";
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -37,7 +38,7 @@ const Login: React.FC = () => {
       <div className="gradient-bg"></div>
       <div className="auth-card">
         <div className="auth-header">
-          <div className="app-logo">FinTrack</div>
+            <img src={logo} alt="Fintrack logo" className="app-logo" />
           <h1 className="auth-title">Welcome Back</h1>
           <p className="auth-subtitle">Sign in to manage your finances</p>
         </div>

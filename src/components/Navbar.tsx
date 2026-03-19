@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Menu, Rocket, LogOut } from "lucide-react";
+import { Menu, LogOut } from "lucide-react";
 import "../styles/Navbar.css";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import logo from "../assets/logo.png";
 
 interface NavbarProps {
   toggleSidebar: () => void;
@@ -51,8 +52,8 @@ const Navbar: React.FC<NavbarProps> = ({ toggleSidebar }) => {
           </button>
 
           <div className="brand-container">
-            <div className="brand-icon-wrapper">
-              <Rocket size={24} className="brand-icon" />
+            <div className="brand-logo-wrapper">
+              <img src={logo} alt="Fintrack logo" className="brand-logo" />
             </div>
             <div className="brand-info">
               <span className="brand-name">FinTrack</span>

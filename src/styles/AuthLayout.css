@@ -6,5 +6,5 @@
   width: 100vw;      /* full screen width */
   margin: 0;
   padding: 0;
-  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  background: linear-gradient(135deg, var(--brand-white), #edf3ff);
 }

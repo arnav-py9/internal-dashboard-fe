@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { User, Mail, Lock, ArrowRight } from "lucide-react";
 import "../styles/Auth.css";
+import logo from "../assets/logo.png";
 
 const Signup: React.FC = () => {
   const [name, setName] = useState("");
@@ -48,7 +49,7 @@ const Signup: React.FC = () => {
 
       <div className="auth-card">
         <div className="auth-header">
-          <div className="app-logo">FinTrack</div>
+          <img src={logo} alt="Fintrack logo" className="app-logo" />
           <h1 className="auth-title">Create Account</h1>
           <p className="auth-subtitle">Start your financial journey</p>
         </div>
