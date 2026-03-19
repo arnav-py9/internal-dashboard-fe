@@ -131,14 +131,14 @@ const Analytics: React.FC = () => {
 
   // Colors for pie charts
   const COLORS = [
-    '#4F46E5', // Indigo
-    '#10B981', // Green
-    '#F59E0B', // Amber
-    '#EF4444', // Red
-    '#8B5CF6', // Purple
-    '#EC4899', // Pink
-    '#06B6D4', // Cyan
-    '#F97316', // Orange
+    "#2563eb",
+    "#1a1a1a",
+    "#93b4f6",
+    "#5e5e5e",
+    "#d3e0fb",
+    "#6f91e8",
+    "#2f2f2f",
+    "#7aa2ff",
   ];
 
   // Custom label for pie chart
@@ -178,8 +178,8 @@ const Analytics: React.FC = () => {
             <>
               <div className="page-header">
                 <div className="header-content">
-                  <h1 className="page-title" style={{ color: 'white' }}>Analytics Dashboard</h1>
-                  <p className="page-description" style={{ color: 'white' }}>Visualize your financial data with interactive charts</p>
+                  <h1 className="page-title">Analytics Dashboard</h1>
+                  <p className="page-description">Visualize your financial data with interactive charts</p>
                 </div>
               </div>
 
@@ -191,10 +191,10 @@ const Analytics: React.FC = () => {
                       <BarChart3 size={24} />
                     </div>
                     <div>
-                      <h2 style={{ fontSize: '1.25rem', fontWeight: '600', margin: 0, color: 'white' }}>
+                      <h2 style={{ fontSize: "1.25rem", fontWeight: "600", margin: 0, color: "#1a1a1a" }}>
                         Transaction Categories
                       </h2>
-                      <p style={{ fontSize: '0.875rem', color: 'white', margin: '4px 0 0 0' }}>
+                      <p style={{ fontSize: "0.875rem", color: "rgba(26,26,26,0.72)", margin: "4px 0 0 0" }}>
                         Distribution of all transactions by category
                       </p>
                     </div>
@@ -220,13 +220,13 @@ const Analytics: React.FC = () => {
                         <Tooltip
                           formatter={(value: number | undefined) => value !== undefined ? `₹${value.toLocaleString()}` : '₹0'}
                           contentStyle={{
-                            backgroundColor: '#1e1e2e',
-                            border: '1px solid rgba(255, 255, 255, 0.15)',
-                            borderRadius: '8px',
-                            color: '#fff'
+                            backgroundColor: "#ffffff",
+                            border: "1px solid rgba(26, 26, 26, 0.12)",
+                            borderRadius: "8px",
+                            color: "#1a1a1a"
                           }}
-                          itemStyle={{ color: '#fff' }}
-                          labelStyle={{ color: '#fff', fontWeight: 'bold' }}
+                          itemStyle={{ color: "#1a1a1a" }}
+                          labelStyle={{ color: "#1a1a1a", fontWeight: "bold" }}
                         />
                         <Legend
                           verticalAlign="bottom"
@@ -241,7 +241,7 @@ const Analytics: React.FC = () => {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      color: 'white'
+                      color: "#1a1a1a"
                     }}>
                       No transaction data available
                     </div>
@@ -255,10 +255,10 @@ const Analytics: React.FC = () => {
                       <TrendingUp size={24} />
                     </div>
                     <div>
-                      <h2 style={{ fontSize: '1.25rem', fontWeight: '600', margin: 0, color: 'white' }}>
+                      <h2 style={{ fontSize: "1.25rem", fontWeight: "600", margin: 0, color: "#1a1a1a" }}>
                         Business Earnings by Category
                       </h2>
-                      <p style={{ fontSize: '0.875rem', color: 'white', margin: '4px 0 0 0' }}>
+                      <p style={{ fontSize: "0.875rem", color: "rgba(26,26,26,0.72)", margin: "4px 0 0 0" }}>
                         Distribution of business profit across categories
                       </p>
                     </div>
@@ -284,13 +284,13 @@ const Analytics: React.FC = () => {
                         <Tooltip
                           formatter={(value: number | undefined) => value !== undefined ? `₹${value.toLocaleString()}` : '₹0'}
                           contentStyle={{
-                            backgroundColor: '#1e1e2e',
-                            border: '1px solid rgba(255, 255, 255, 0.15)',
-                            borderRadius: '8px',
-                            color: '#fff'
+                            backgroundColor: "#ffffff",
+                            border: "1px solid rgba(26, 26, 26, 0.12)",
+                            borderRadius: "8px",
+                            color: "#1a1a1a"
                           }}
-                          itemStyle={{ color: '#fff' }}
-                          labelStyle={{ color: '#fff', fontWeight: 'bold' }}
+                          itemStyle={{ color: "#1a1a1a" }}
+                          labelStyle={{ color: "#1a1a1a", fontWeight: "bold" }}
                         />
                         <Legend
                           verticalAlign="bottom"
@@ -305,7 +305,7 @@ const Analytics: React.FC = () => {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      color: 'white'
+                      color: "#1a1a1a"
                     }}>
                       No business profit data available
                     </div>
@@ -320,10 +320,10 @@ const Analytics: React.FC = () => {
                     <Activity size={24} />
                   </div>
                   <div>
-                    <h2 style={{ fontSize: "1.25rem", fontWeight: "600", margin: 0, color: "white" }}>
+                    <h2 style={{ fontSize: "1.25rem", fontWeight: "600", margin: 0, color: "#1a1a1a" }}>
                       Cumulative Revenue Over Time
                     </h2>
-                    <p style={{ fontSize: "0.875rem", color: "white", margin: "4px 0 0 0" }}>
+                    <p style={{ fontSize: "0.875rem", color: "rgba(26,26,26,0.72)", margin: "4px 0 0 0" }}>
                       Running total of business profit (your revenue) by date
                     </p>
                   </div>
@@ -332,29 +332,29 @@ const Analytics: React.FC = () => {
                 {cumulativeData.length > 0 ? (
                   <ResponsiveContainer width="100%" height={320}>
                     <LineChart data={cumulativeData} margin={{ top: 8, right: 24, left: 8, bottom: 8 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(26,26,26,0.12)" />
                       <XAxis
                         dataKey="date"
-                        stroke="rgba(255,255,255,0.6)"
-                        tick={{ fill: "rgba(255,255,255,0.8)", fontSize: 12 }}
+                        stroke="rgba(26,26,26,0.5)"
+                        tick={{ fill: "rgba(26,26,26,0.75)", fontSize: 12 }}
                         tickFormatter={(v) => {
                           const [y, m, d] = v.split("-");
                           return `${d}/${m}/${y.slice(2)}`;
                         }}
                       />
                       <YAxis
-                        stroke="rgba(255,255,255,0.6)"
-                        tick={{ fill: "rgba(255,255,255,0.8)", fontSize: 12 }}
+                        stroke="rgba(26,26,26,0.5)"
+                        tick={{ fill: "rgba(26,26,26,0.75)", fontSize: 12 }}
                         tickFormatter={(v) => `₹${v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v}`}
                       />
                       <Tooltip
                         contentStyle={{
-                          backgroundColor: "#1e1e2e",
-                          border: "1px solid rgba(255, 255, 255, 0.15)",
+                          backgroundColor: "#ffffff",
+                          border: "1px solid rgba(26, 26, 26, 0.12)",
                           borderRadius: "8px",
-                          color: "#fff"
+                          color: "#1a1a1a"
                         }}
-                        labelStyle={{ color: "#fff", fontWeight: "bold" }}
+                        labelStyle={{ color: "#1a1a1a", fontWeight: "bold" }}
                         formatter={(value: number | undefined) => [`₹${(value ?? 0).toLocaleString()}`, "Cumulative value"]}
                         labelFormatter={(label) => `Date: ${label}`}
                       />
@@ -362,10 +362,10 @@ const Analytics: React.FC = () => {
                         type="monotone"
                         dataKey="value"
                         name="Cumulative business profit"
-                        stroke="#10B981"
+                        stroke="#2563eb"
                         strokeWidth={2}
-                        dot={{ fill: "#10B981", strokeWidth: 0 }}
-                        activeDot={{ r: 6, fill: "#10B981", stroke: "#fff", strokeWidth: 2 }}
+                        dot={{ fill: "#2563eb", strokeWidth: 0 }}
+                        activeDot={{ r: 6, fill: "#2563eb", stroke: "#ffffff", strokeWidth: 2 }}
                       />
                     </LineChart>
                   </ResponsiveContainer>
@@ -376,7 +376,7 @@ const Analytics: React.FC = () => {
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      color: "white"
+                      color: "#1a1a1a"
                     }}
                   >
                     No cumulative data found. Add business profit entries to see your revenue grow over time.
@@ -387,29 +387,29 @@ const Analytics: React.FC = () => {
               {/* Summary Stats */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginTop: '24px' }}>
                 <div className="stat-card-pro" style={{ padding: '20px' }}>
-                  <p style={{ fontSize: '0.875rem', color: 'white', margin: '0 0 8px 0' }}>Total Transactions</p>
-                  <h3 style={{ fontSize: '1.875rem', fontWeight: '700', margin: 0, color: 'white' }}>
+                  <p style={{ fontSize: "0.875rem", color: "rgba(26,26,26,0.72)", margin: "0 0 8px 0" }}>Total Transactions</p>
+                  <h3 style={{ fontSize: "1.875rem", fontWeight: "700", margin: 0, color: "#1a1a1a" }}>
                     {transactions.length}
                   </h3>
                 </div>
 
                 <div className="stat-card-pro" style={{ padding: '20px' }}>
-                  <p style={{ fontSize: '0.875rem', color: 'white', margin: '0 0 8px 0' }}>Total Categories</p>
-                  <h3 style={{ fontSize: '1.875rem', fontWeight: '700', margin: 0, color: 'white' }}>
+                  <p style={{ fontSize: "0.875rem", color: "rgba(26,26,26,0.72)", margin: "0 0 8px 0" }}>Total Categories</p>
+                  <h3 style={{ fontSize: "1.875rem", fontWeight: "700", margin: 0, color: "#1a1a1a" }}>
                     {transactionCategoriesData.length}
                   </h3>
                 </div>
 
                 <div className="stat-card-pro" style={{ padding: '20px' }}>
-                  <p style={{ fontSize: '0.875rem', color: 'white', margin: '0 0 8px 0' }}>Business Profit</p>
-                  <h3 style={{ fontSize: '1.875rem', fontWeight: '700', margin: 0, color: 'white' }}>
+                  <p style={{ fontSize: "0.875rem", color: "rgba(26,26,26,0.72)", margin: "0 0 8px 0" }}>Business Profit</p>
+                  <h3 style={{ fontSize: "1.875rem", fontWeight: "700", margin: 0, color: "#1a1a1a" }}>
                     ₹{businessProfitData.total_profit.toLocaleString()}
                   </h3>
                 </div>
 
                 <div className="stat-card-pro" style={{ padding: '20px' }}>
-                  <p style={{ fontSize: '0.875rem', color: 'white', margin: '0 0 8px 0' }}>Profit Sources</p>
-                  <h3 style={{ fontSize: '1.875rem', fontWeight: '700', margin: 0, color: 'white' }}>
+                  <p style={{ fontSize: "0.875rem", color: "rgba(26,26,26,0.72)", margin: "0 0 8px 0" }}>Profit Sources</p>
+                  <h3 style={{ fontSize: "1.875rem", fontWeight: "700", margin: 0, color: "#1a1a1a" }}>
                     {businessProfitCategoriesData.length}
                   </h3>
                 </div>
