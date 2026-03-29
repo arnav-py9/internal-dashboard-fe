@@ -231,9 +231,13 @@ const ProfitFromBusiness: React.FC = () => {
 
   const categories = ["Content-FB", "Content-Known", "Software-Known", "Content-Cold"];
 
-  // Calculate stats
+  // Calculate stats (this calendar month — month and year must match)
+  const now = new Date();
   const thisMonthProfit = transactions
-    .filter(t => new Date(t.date).getMonth() === new Date().getMonth())
+    .filter((t) => {
+      const d = new Date(t.date);
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    })
     .reduce((sum, t) => sum + t.amount, 0);
 
   const avgProfit = transactions.length > 0 ? totalProfit / transactions.length : 0;

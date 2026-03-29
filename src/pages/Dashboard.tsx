@@ -442,8 +442,8 @@ const Dashboard: React.FC = () => {
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <span style={{ fontSize: '1.2rem', color: 'white', fontWeight: '600' }}>₹{monthlyExp.toLocaleString()}</span>
-                        <span style={{ fontSize: '0.875rem', color: 'white', opacity: 0.7 }}>/mo</span>
+                        <span style={{ fontSize: "1.2rem", color: "#1a1a1a", fontWeight: "600" }}>₹{monthlyExp.toLocaleString()}</span>
+                        <span style={{ fontSize: "0.875rem", color: "rgba(26, 26, 26, 0.65)" }}>/mo</span>
                       </div>
                       <button
                         className="btn-icon edit"

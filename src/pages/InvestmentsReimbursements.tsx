@@ -261,7 +261,7 @@ const InvestmentsReimbursements: React.FC = () => {
                 const s = foundersSummary[founder] || { total_invested: 0, reimbursements_received: 0, reimbursements_made: 0, salary_taken: 0, exact_payment: 0, net_contribution: 0 };
                 return (
                   <div key={founder} style={{ marginBottom: '2rem' }}>
-                    <h2 style={{ color: '#e2e8f0', fontSize: '1.25rem', fontWeight: '600', marginBottom: '1rem', paddingLeft: '0.25rem' }}>
+                    <h2 style={{ color: "#1a1a1a", fontSize: "1.25rem", fontWeight: "600", marginBottom: "1rem", paddingLeft: "0.25rem" }}>
                       {founder}
                     </h2>
                     <div className="stats-container">

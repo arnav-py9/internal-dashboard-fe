@@ -150,7 +150,7 @@
   border-radius: 10px;
   font-size: 14px;
   font-weight: 700;
-  color: white;
+  color: var(--text-on-accent);
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
@@ -180,14 +180,13 @@
 .user-role {
   font-size: 11px;
   font-weight: 500;
-  color: var(--text-tertiary);
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .dropdown-arrow {
-  color: var(--text-tertiary);
+  color: var(--text-muted);
   transition: transform 0.3s;
 }
 
@@ -231,7 +230,7 @@
   border-radius: 14px;
   font-size: 18px;
   font-weight: 700;
-  color: white;
+  color: var(--text-on-accent);
   box-shadow: 0 8px 24px rgba(37, 99, 235, 0.3);
 }
 

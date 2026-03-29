@@ -153,7 +153,7 @@ const Analytics: React.FC = () => {
       <text
         x={x}
         y={y}
-        fill="white"
+        fill="#1a1a1a"
         textAnchor={x > cx ? 'start' : 'end'}
         dominantBaseline="central"
         fontSize={12}
