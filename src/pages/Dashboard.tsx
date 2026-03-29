@@ -241,6 +241,40 @@ const Dashboard: React.FC = () => {
     })
     .reduce((sum, t) => sum + t.amount, 0);
 
+  const currentMonthCredit = transactions
+    .filter((t) => {
+      if (t.type !== "income") return false;
+      const d = new Date(t.date);
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    })
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  const currentMonthNet = currentMonthCredit - currentMonthDebit;
+
+  const lastMonthRef = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const lastMonthDebit = transactions
+    .filter((t) => {
+      if (t.type !== "expense") return false;
+      const d = new Date(t.date);
+      return d.getMonth() === lastMonthRef.getMonth() && d.getFullYear() === lastMonthRef.getFullYear();
+    })
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  let expenseMomLabel: string;
+  let expenseMomTrend: "positive" | "negative" | "neutral";
+  if (lastMonthDebit > 0) {
+    const pct = ((currentMonthDebit - lastMonthDebit) / lastMonthDebit) * 100;
+    const rounded = Math.round(pct);
+    expenseMomLabel = rounded === 0 ? "0%" : `${rounded > 0 ? "+" : ""}${rounded}%`;
+    expenseMomTrend = rounded > 0 ? "negative" : rounded < 0 ? "positive" : "neutral";
+  } else if (currentMonthDebit > 0) {
+    expenseMomLabel = "new";
+    expenseMomTrend = "neutral";
+  } else {
+    expenseMomLabel = "0%";
+    expenseMomTrend = "neutral";
+  }
+
   const businessPaidDebit = transactions
     .filter((t) => t.type === "expense" && t.payee === "Business")
     .reduce((sum, t) => sum + t.amount, 0);
@@ -410,7 +444,9 @@ const Dashboard: React.FC = () => {
                     <div className="stat-icon-wrapper debit">
                       <TrendingDown size={24} />
                     </div>
-                    <span className="stat-trend negative">-{totalDebit > 0 ? '12%' : '0%'}</span>
+                    <span className={`stat-trend ${expenseMomTrend}`} title="Change vs last month (total expenses)">
+                      {expenseMomLabel}
+                    </span>
                   </div>
                   <div className="stat-body">
                     <p className="stat-label">Total Expenses</p>
@@ -424,8 +460,11 @@ const Dashboard: React.FC = () => {
                     <div className="stat-icon-wrapper balance">
                       <Wallet size={24} />
                     </div>
-                    <span className={`stat-trend ${totalBalance > 0 ? 'positive' : 'neutral'}`}>
-                      {totalBalance > 0 ? '+' : ''}₹{Math.abs(totalBalance - totalDebit).toLocaleString()}
+                    <span
+                      className={`stat-trend ${currentMonthNet > 0 ? "positive" : currentMonthNet < 0 ? "negative" : "neutral"}`}
+                      title="This month: income minus expenses (from transactions)"
+                    >
+                      {currentMonthNet > 0 ? "+" : ""}₹{currentMonthNet.toLocaleString()}
                     </span>
                   </div>
                   <div className="stat-body">

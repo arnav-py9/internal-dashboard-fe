@@ -233,12 +233,12 @@ const ProfitFromBusiness: React.FC = () => {
 
   // Calculate stats (this calendar month — month and year must match)
   const now = new Date();
-  const thisMonthProfit = transactions
-    .filter((t) => {
-      const d = new Date(t.date);
-      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-    })
-    .reduce((sum, t) => sum + t.amount, 0);
+  const thisMonthEntries = transactions.filter((t) => {
+    const d = new Date(t.date);
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  });
+  const thisMonthProfit = thisMonthEntries.reduce((sum, t) => sum + t.amount, 0);
+  const thisMonthEntryCount = thisMonthEntries.length;
 
   const avgProfit = transactions.length > 0 ? totalProfit / transactions.length : 0;
 
@@ -286,7 +286,7 @@ const ProfitFromBusiness: React.FC = () => {
                 <div className="stat-icon-wrapper income">
                   <TrendingUp size={24} />
                 </div>
-                <span className="stat-badge">{transactions.length} entries</span>
+                <span className="stat-badge">{thisMonthEntryCount} entries</span>
               </div>
               <div className="stat-body">
                 <p className="stat-label">This Month</p>
