@@ -7,6 +7,7 @@ import ProfitFromBusiness from "./pages/ProfitFromBusiness";
 import InvestmentsReimbursements from "./pages/InvestmentsReimbursements";
 import Analytics from "./pages/Analytics";
 import Signup from "./pages/Signup";
+import Overview from "./pages/Overview";
 
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
   const { user } = useAuth();
@@ -20,6 +21,14 @@ const App: React.FC = () => (
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup/>} />
+        <Route
+          path="/overview"
+          element={
+            <PrivateRoute>
+              <Overview />
+            </PrivateRoute>
+          }
+        />
         <Route 
           path="/dashboard" 
           element={
