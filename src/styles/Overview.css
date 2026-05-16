@@ -183,21 +183,9 @@
   .overview-bottom-grid {
     grid-template-columns: 1fr;
   }
-
-  .overview-tables-stack {
-    flex-direction: row;
-  }
-
-  .overview-tables-stack > * {
-    flex: 1;
-  }
 }
 
 @media (max-width: 720px) {
-  .overview-tables-stack {
-    flex-direction: column;
-  }
-
   .overview-filter-inputs {
     flex-direction: column;
   }
