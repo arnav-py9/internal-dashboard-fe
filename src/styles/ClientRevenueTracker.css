@@ -1,0 +1,628 @@
+/* ─── Client Revenue Tracker ─────────────────────────────────────────────────── */
+
+/* Loading state */
+.crt-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 60vh;
+  gap: 16px;
+  color: rgba(26, 26, 26, 0.55);
+  font-size: 0.95rem;
+}
+
+.crt-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(37, 99, 235, 0.15);
+  border-top-color: #2563eb;
+  border-radius: 50%;
+  animation: crtSpin 0.8s linear infinite;
+}
+
+@keyframes crtSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Tabs ─────────────────────────────────────────────────────────────────────── */
+.crt-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--bg-muted);
+  border-radius: 12px;
+  padding: 4px;
+  width: fit-content;
+  margin-bottom: 2rem;
+}
+
+.crt-tab {
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.crt-tab:hover {
+  color: var(--brand-blue);
+}
+
+.crt-tab.active {
+  background: var(--brand-white);
+  color: var(--brand-blue);
+  box-shadow: 0 1px 4px rgba(26, 26, 26, 0.1);
+  font-weight: 600;
+}
+
+/* ── KPI grid (7 cards, wrapping) ─────────────────────────────────────────────── */
+.crt-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+@media (max-width: 1280px) {
+  .crt-kpi-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 900px) {
+  .crt-kpi-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 580px) {
+  .crt-kpi-grid { grid-template-columns: 1fr; }
+}
+
+/* ── Stat card small variant ──────────────────────────────────────────────────── */
+.crt-stat-card {
+  background: var(--brand-white);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 1.25rem 1.5rem;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.crt-stat-card:hover {
+  box-shadow: var(--shadow-soft);
+  border-color: rgba(37, 99, 235, 0.2);
+}
+
+.crt-stat-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--bg-hover);
+  color: var(--brand-blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.75rem;
+}
+
+.crt-stat-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 6px 0;
+}
+
+.crt-stat-value {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 4px 0;
+  line-height: 1;
+}
+
+.crt-stat-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* colored accent left border */
+.crt-stat-card.warn { border-left: 3px solid #f59e0b; }
+.crt-stat-card.success { border-left: 3px solid #16a34a; }
+.crt-stat-card.danger { border-left: 3px solid #dc2626; }
+.crt-stat-card.info { border-left: 3px solid var(--brand-blue); }
+
+/* ── 2-column bottom grid ─────────────────────────────────────────────────────── */
+.crt-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1.6fr;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+@media (max-width: 1100px) {
+  .crt-two-col { grid-template-columns: 1fr; }
+}
+
+/* ── Progress bar ─────────────────────────────────────────────────────────────── */
+.crt-progress-bar {
+  width: 100%;
+  height: 6px;
+  background: var(--bg-muted);
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 6px 0 4px 0;
+}
+
+.crt-progress-fill {
+  height: 100%;
+  background: var(--brand-blue);
+  border-radius: 10px;
+  transition: width 0.3s ease;
+}
+
+.crt-progress-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+/* ── Status badges ────────────────────────────────────────────────────────────── */
+.crt-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.crt-badge.active    { background: rgba(37,99,235,0.1);  color: #2563eb; }
+.crt-badge.completed { background: rgba(22,163,74,0.1);  color: #16a34a; }
+.crt-badge.settled   { background: rgba(107,114,128,0.1);color: #4b5563; }
+.crt-badge.ended_early { background: rgba(245,158,11,0.1);color: #d97706; }
+.crt-badge.cancelled { background: rgba(220,38,38,0.1);  color: #dc2626; }
+.crt-badge.draft     { background: rgba(107,114,128,0.1);color: #9ca3af; }
+.crt-badge.inactive  { background: rgba(107,114,128,0.1);color: #6b7280; }
+
+/* ── Activity list ────────────────────────────────────────────────────────────── */
+.crt-activity-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.crt-activity-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--bg-muted);
+}
+
+.crt-activity-item:last-child { border-bottom: none; }
+
+.crt-activity-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-top: 6px;
+  flex-shrink: 0;
+}
+
+.crt-activity-dot.delivery  { background: #2563eb; }
+.crt-activity-dot.payment   { background: #16a34a; }
+.crt-activity-dot.settlement{ background: #d97706; }
+.crt-activity-dot.batch_created { background: #9ca3af; }
+.crt-activity-dot.batch_ended   { background: #dc2626; }
+
+.crt-activity-body { flex: 1; }
+.crt-activity-title { font-size: 14px; font-weight: 500; color: var(--text-primary); margin: 0 0 2px 0; }
+.crt-activity-desc  { font-size: 12px; color: var(--text-secondary); margin: 0; }
+.crt-activity-date  { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+
+/* ── Clickable row ────────────────────────────────────────────────────────────── */
+.crt-row-clickable {
+  cursor: pointer;
+}
+
+.crt-row-clickable:hover {
+  background: var(--bg-hover) !important;
+}
+
+/* ── Action button small ──────────────────────────────────────────────────────── */
+.crt-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--border-color);
+  background: var(--brand-white);
+  color: var(--text-secondary);
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.crt-action-btn:hover {
+  border-color: rgba(37,99,235,0.35);
+  color: var(--brand-blue);
+  background: var(--bg-hover);
+}
+
+.crt-action-btn.primary {
+  background: var(--brand-blue);
+  color: #fff;
+  border-color: var(--brand-blue);
+  box-shadow: 0 4px 12px rgba(37,99,235,0.18);
+}
+
+.crt-action-btn.primary:hover {
+  opacity: 0.88;
+  color: #fff;
+}
+
+.crt-action-btn.danger-outline {
+  color: #dc2626;
+  border-color: rgba(220,38,38,0.3);
+}
+
+.crt-action-btn.danger-outline:hover {
+  background: rgba(220,38,38,0.06);
+  border-color: #dc2626;
+}
+
+/* ── Client / Batch detail panel ──────────────────────────────────────────────── */
+.crt-detail-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 1.5rem;
+}
+
+.crt-detail-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 4px 0;
+}
+
+.crt-detail-subtitle {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.crt-detail-meta {
+  font-size: 13px;
+  color: var(--text-secondary);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 1.5rem;
+}
+
+.crt-detail-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.crt-mini-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 900px) {
+  .crt-mini-cards { grid-template-columns: repeat(2, 1fr); }
+}
+
+.crt-mini-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+}
+
+.crt-mini-card-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin: 0 0 6px 0;
+}
+
+.crt-mini-card-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+/* ── Detail section heading ──────────────────────────────────────────────────── */
+.crt-section-heading {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--text-muted);
+  margin: 1.75rem 0 0.75rem 0;
+}
+
+/* ── Batch progress block ─────────────────────────────────────────────────────── */
+.crt-progress-block {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.crt-progress-numbers {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 8px 0;
+}
+
+.crt-progress-bar-lg {
+  width: 100%;
+  height: 10px;
+  background: var(--bg-muted);
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 8px 0;
+}
+
+.crt-progress-fill-lg {
+  height: 100%;
+  background: var(--brand-blue);
+  border-radius: 10px;
+  transition: width 0.4s ease;
+}
+
+.crt-progress-pending {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* ── Metric row in batch detail ──────────────────────────────────────────────── */
+.crt-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+@media (max-width: 900px) {
+  .crt-metric-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+.crt-metric-box {
+  background: var(--brand-white);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+}
+
+.crt-metric-box-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin: 0 0 6px 0;
+}
+
+.crt-metric-box-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+/* ── History log items ────────────────────────────────────────────────────────── */
+.crt-log-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--bg-muted);
+  font-size: 13px;
+}
+
+.crt-log-item:last-child { border-bottom: none; }
+
+.crt-log-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+
+.crt-log-dot.payment    { background: #16a34a; }
+.crt-log-dot.delivery   { background: #2563eb; }
+.crt-log-dot.settlement { background: #d97706; }
+
+.crt-log-date { color: var(--text-muted); min-width: 90px; }
+.crt-log-desc { color: var(--text-primary); font-weight: 500; flex: 1; }
+.crt-log-amount { color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+
+/* ── Modal overlay ────────────────────────────────────────────────────────────── */
+.crt-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(26, 26, 26, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.crt-modal {
+  background: var(--brand-white);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-medium);
+}
+
+.crt-modal.wide { max-width: 720px; }
+
+.crt-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1.75rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.crt-modal-header h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 4px 0;
+}
+
+.crt-modal-header p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.crt-modal-close {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-muted);
+  border: none;
+  border-radius: 8px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.crt-modal-close:hover {
+  background: var(--bg-hover);
+  color: var(--brand-blue);
+}
+
+.crt-modal-body {
+  padding: 1.75rem;
+}
+
+.crt-modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 1.5rem;
+}
+
+.crt-modal-actions button { flex: 1; }
+
+/* ── Form field (reuse input-pro, form-field from Dashboard.css) ──────────────── */
+.crt-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.crt-form-grid.single { grid-template-columns: 1fr; }
+
+@media (max-width: 500px) {
+  .crt-form-grid { grid-template-columns: 1fr; }
+}
+
+.crt-per-video-hint {
+  background: var(--bg-hover);
+  border: 1px solid rgba(37,99,235,0.15);
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 13px;
+  color: var(--brand-blue);
+  margin-bottom: 1rem;
+}
+
+/* ── Warning/danger modal ────────────────────────────────────────────────────── */
+.crt-warning-block {
+  background: rgba(245,158,11,0.06);
+  border: 1px solid rgba(245,158,11,0.25);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.crt-warning-block p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.crt-warning-block strong {
+  color: var(--text-primary);
+}
+
+/* ── Error message ────────────────────────────────────────────────────────────── */
+.crt-error {
+  background: rgba(220,38,38,0.06);
+  border: 1px solid rgba(220,38,38,0.2);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #dc2626;
+  margin-bottom: 1rem;
+}
+
+/* ── Back button ──────────────────────────────────────────────────────────────── */
+.crt-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 1.25rem;
+  transition: color 0.15s ease;
+}
+
+.crt-back-btn:hover { color: var(--brand-blue); }
+
+/* ── Batch detail action row ──────────────────────────────────────────────────── */
+.crt-batch-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+
+/* ── Empty mini state ─────────────────────────────────────────────────────────── */
+.crt-empty-mini {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-muted);
+  font-size: 13px;
+}

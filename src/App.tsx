@@ -8,6 +8,7 @@ import InvestmentsReimbursements from "./pages/InvestmentsReimbursements";
 import Analytics from "./pages/Analytics";
 import Signup from "./pages/Signup";
 import Overview from "./pages/Overview";
+import ClientRevenueTracker from "./pages/ClientRevenueTracker";
 
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
   const { user } = useAuth();
@@ -42,6 +43,14 @@ const App: React.FC = () => (
           element={
             <PrivateRoute>
               <ProfitFromBusiness />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/client-revenue"
+          element={
+            <PrivateRoute>
+              <ClientRevenueTracker />
             </PrivateRoute>
           }
         />
