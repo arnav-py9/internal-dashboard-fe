@@ -28,6 +28,7 @@ const AddSettlementModal: React.FC<Props> = ({ batchId, batchName, metrics, onCl
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!amt || amt <= 0) { setError("Enter a valid settlement amount."); return; }
+    if (fromAccount === toAccount) { setError("Settlement accounts must be different."); return; }
     if (amt > metrics.unsettledEarned) {
       setError(`Settlement cannot exceed unsettled earned revenue (${formatINR(metrics.unsettledEarned)}).`);
       return;

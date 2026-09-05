@@ -106,6 +106,14 @@ const ClientRevenueTracker: React.FC = () => {
     if (!res.ok) { console.error("Failed to add delivery"); return; }
     const saved: DeliveryLog = await res.json();
     setDeliveries((prev) => [saved, ...prev]);
+    const previouslyDelivered = deliveries
+      .filter((item) => item.batchId === saved.batchId)
+      .reduce((total, item) => total + item.videosCompleted, 0);
+    setBatches((prev) => prev.map((batch) => (
+      batch.id === saved.batchId && previouslyDelivered + saved.videosCompleted >= batch.committedVideos
+        ? { ...batch, status: "completed" }
+        : batch
+    )));
   };
 
   const handleAddSettlement = async (settlement: Settlement) => {
