@@ -2,7 +2,12 @@
 // All business logic is centralised here so swapping mock state for API calls
 // later only requires touching this file (or replacing it with API responses).
 
-import type { Batch, Payment, DeliveryLog, Settlement } from "../data/clientRevenueMockData";
+import type {
+  Batch,
+  Payment,
+  DeliveryLog,
+  Settlement,
+} from "../data/clientRevenueMockData";
 
 // ── Formatting ──────────────────────────────────────────────────────────────────
 
@@ -22,7 +27,11 @@ export function formatINR(value: number): string {
 /** Format a date string as "Aug 20, 2026" */
 export function formatDate(dateStr: string): string {
   const d = new Date(dateStr);
-  return d.toLocaleDateString("en-IN", { year: "numeric", month: "short", day: "numeric" });
+  return d.toLocaleDateString("en-IN", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
 }
 
 // ── Per-batch metrics ──────────────────────────────────────────────────────────
@@ -44,22 +53,34 @@ export function calcBatchMetrics(
   batch: Batch,
   payments: Payment[],
   deliveryLogs: DeliveryLog[],
-  settlements: Settlement[]
+  settlements: Settlement[],
 ): BatchMetrics {
   const batchPayments = payments.filter((p) => p.batchId === batch.id);
   const batchDeliveries = deliveryLogs.filter((d) => d.batchId === batch.id);
   const batchSettlements = settlements.filter((s) => s.batchId === batch.id);
 
   const perVideoValue =
-    batch.committedVideos > 0 ? batch.committedValue / batch.committedVideos : 0;
+    batch.committedVideos > 0
+      ? batch.committedValue / batch.committedVideos
+      : 0;
 
-  const videosDelivered = batchDeliveries.reduce((sum, d) => sum + d.videosCompleted, 0);
+  const videosDelivered = batchDeliveries.reduce(
+    (sum, d) => sum + d.videosCompleted,
+    0,
+  );
   const pendingVideos = Math.max(batch.committedVideos - videosDelivered, 0);
   const earnedRevenue = videosDelivered * perVideoValue;
 
   const cashReceived = batchPayments.reduce((sum, p) => sum + p.amount, 0);
-  const receivable = Math.max(earnedRevenue - cashReceived, 0);
-  const unearnedAdvance = Math.max(cashReceived - earnedRevenue, 0);
+  const rawReceivable = Math.max(earnedRevenue - cashReceived, 0);
+  const paidWithinConversionTolerance =
+    cashReceived > 0 && Math.abs(batch.committedValue - cashReceived) < 50;
+  const receivable =
+    paidWithinConversionTolerance && rawReceivable < 50 ? 0 : rawReceivable;
+  // Small conversion residuals are not actionable; retain the original receipts.
+  const advance = Math.max(cashReceived - earnedRevenue, 0);
+  const unearnedAdvance =
+    videosDelivered >= batch.committedVideos && advance < 50 ? 0 : advance;
 
   const settledAmount = batchSettlements.reduce((sum, s) => sum + s.amount, 0);
   const unsettledEarned = Math.max(earnedRevenue - settledAmount, 0);
@@ -95,7 +116,7 @@ export function calcClientMetrics(
   batches: Batch[],
   payments: Payment[],
   deliveryLogs: DeliveryLog[],
-  settlements: Settlement[]
+  settlements: Settlement[],
 ): ClientMetrics {
   const clientBatches = batches.filter((b) => b.clientId === clientId);
 
@@ -116,7 +137,13 @@ export function calcClientMetrics(
     }
   }
 
-  return { lifetimeRevenue, totalVideosDelivered, totalReceivable, totalUnsettled, activeBatchId };
+  return {
+    lifetimeRevenue,
+    totalVideosDelivered,
+    totalReceivable,
+    totalUnsettled,
+    activeBatchId,
+  };
 }
 
 // ── Global overview metrics (current month) ────────────────────────────────────
@@ -135,7 +162,7 @@ export function calcOverviewMetrics(
   batches: Batch[],
   payments: Payment[],
   deliveryLogs: DeliveryLog[],
-  settlements: Settlement[]
+  settlements: Settlement[],
 ): OverviewMetrics {
   const now = new Date();
   const thisMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
@@ -158,15 +185,18 @@ export function calcOverviewMetrics(
 
     // This-month payments
     const monthPayments = payments.filter(
-      (p) => p.batchId === batch.id && p.date.startsWith(thisMonth)
+      (p) => p.batchId === batch.id && p.date.startsWith(thisMonth),
     );
     cashReceivedThisMonth += monthPayments.reduce((s, p) => s + p.amount, 0);
 
     // This-month deliveries
     const monthDeliveries = deliveryLogs.filter(
-      (d) => d.batchId === batch.id && d.date.startsWith(thisMonth)
+      (d) => d.batchId === batch.id && d.date.startsWith(thisMonth),
     );
-    const monthVideos = monthDeliveries.reduce((s, d) => s + d.videosCompleted, 0);
+    const monthVideos = monthDeliveries.reduce(
+      (s, d) => s + d.videosCompleted,
+      0,
+    );
     videosDeliveredThisMonth += monthVideos;
     revenueEarnedThisMonth += monthVideos * m.perVideoValue;
   }
