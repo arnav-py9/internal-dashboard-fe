@@ -714,6 +714,9 @@
   margin: 8px;
 }
 .ro-dialog {
+  position: fixed;
+  inset: 0;
+  margin: auto;
   padding: 0;
   border: 1px solid var(--ro-border);
   border-radius: 16px;
