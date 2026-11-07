@@ -20,7 +20,7 @@ export interface Client {
 
 export interface Batch {
   studioScopeDelivered?:number; studioDelivered?:number; studioProgressNote?:string; studioObserved?:string;
-  supersededBy?:string; valuationPending?:boolean; nativeValue?:number;
+  supersededBy?:string; valuationPending?:boolean; nativeValue?:number; nativeUnitRate?:number;
   id: string;
   clientId: string;
   batchName: string;

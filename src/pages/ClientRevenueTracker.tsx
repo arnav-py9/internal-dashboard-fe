@@ -107,6 +107,32 @@ export default function ClientRevenueTracker() {
   useEffect(() => {
     void load();
   }, [load]);
+  // Keep the mirror current without clearing an open form or interrupting the list.
+  useEffect(() => {
+    if (modal || loading || loadError) return;
+    let disposed = false,
+      inFlight = false;
+    async function refresh() {
+      if (disposed || inFlight || document.visibilityState !== "visible")
+        return;
+      inFlight = true;
+      try {
+        const fresh = await request<Data>("/");
+        if (!disposed) setData(fresh);
+      } catch {
+        /* Preserve the last successful snapshot and its visible time. */
+      } finally {
+        inFlight = false;
+      }
+    }
+    const timer = window.setInterval(refresh, 60000);
+    window.addEventListener("focus", refresh);
+    return () => {
+      disposed = true;
+      window.clearInterval(timer);
+      window.removeEventListener("focus", refresh);
+    };
+  }, [modal, loading, loadError]);
   const rows = useMemo(
     () =>
       data.batches
@@ -647,14 +673,19 @@ export default function ClientRevenueTracker() {
                         <li key={w.id}>
                           <strong>{c.name}</strong> · {w.title}
                           <br />
-                          {w.status} · {w.delivered}/{w.scope} in Studio scope
+                          {w.status} · {w.delivered}/{w.scope} delivered in
+                          Studio scope
                           {w.summary !== w.status && " · " + w.summary}
                           {data.batches.find((b) => b.id === w.financeId)
                             ?.valuationPending &&
                             " · $" +
                               data.batches.find((b) => b.id === w.financeId)
                                 ?.nativeValue +
-                              " USD agreement; INR pending"}{" "}
+                              " USD agreement (" +
+                              "$" +
+                              data.batches.find((b) => b.id === w.financeId)
+                                ?.nativeUnitRate +
+                              " per SF); INR pending"}{" "}
                           <small>
                             {" "}
                             · Synced{" "}
