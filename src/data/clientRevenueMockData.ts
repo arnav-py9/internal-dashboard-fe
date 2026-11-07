@@ -4,7 +4,10 @@
 
 export type BatchStatus = "active" | "completed" | "ended_early" | "settled" | "cancelled" | "draft";
 
+export interface StudioWork {id:string; title:string; scope:number; delivered:number; summary:string; status:string; financeId:string|null}
 export interface Client {
+  studioWork?:StudioWork[];
+  studioObserved?:string;
   id: string;
   name: string;
   contactName: string;
@@ -16,6 +19,8 @@ export interface Client {
 }
 
 export interface Batch {
+  studioScopeDelivered?:number; studioDelivered?:number; studioProgressNote?:string; studioObserved?:string;
+  supersededBy?:string; valuationPending?:boolean; nativeValue?:number;
   id: string;
   clientId: string;
   batchName: string;

@@ -29,10 +29,13 @@ export function batchOperations(
     metrics.cashReceived > 0 &&
     difference !== 0 &&
     Math.abs(difference) < FX_TOLERANCE;
-  const remaining = fxAdjusted ? 0 : Math.max(difference, 0);
-  const credit = fxAdjusted ? 0 : Math.max(-difference, 0);
-  const paymentStatus =
-    metrics.cashReceived === 0
+  const remaining =
+    batch.valuationPending || fxAdjusted ? 0 : Math.max(difference, 0);
+  const credit =
+    batch.valuationPending || fxAdjusted ? 0 : Math.max(-difference, 0);
+  const paymentStatus = batch.valuationPending
+    ? "INR value pending"
+    : metrics.cashReceived === 0
       ? "Unpaid"
       : credit > 0
         ? "Overpaid"
@@ -57,6 +60,7 @@ export function batchOperations(
     batch.expectedEndDate < today &&
     metrics.pendingVideos > 0;
   const needsConfirmation =
+    !batch.studioObserved &&
     active &&
     metrics.pendingVideos > 0 &&
     (overdue || age >= 7 || (!lastDelivery && metrics.cashReceived > 0));
@@ -69,24 +73,27 @@ export function batchOperations(
           ? "Draft"
           : metrics.pendingVideos === 0
             ? "Delivered"
-            : !lastDelivery
-              ? "No delivery recorded"
-              : "In progress";
-  const nextStep =
-    batch.status === "ended_early"
+            : metrics.videosDelivered > 0
+              ? "In progress"
+              : !lastDelivery
+                ? "No delivery recorded"
+                : "In progress";
+  const nextStep = batch.valuationPending
+    ? "Set INR agreement value in FinTrack"
+    : batch.status === "ended_early"
       ? "Review final agreement"
       : batch.status === "cancelled"
         ? "No further work planned"
         : overdue
           ? "Confirm overdue delivery"
           : needsConfirmation
-            ? "Confirm delivery with team"
+            ? "Check delivery in Studio"
             : remaining > 0
               ? metrics.cashReceived
                 ? "Follow up remaining payment"
                 : "Record payment when received"
               : metrics.pendingVideos > 0
-                ? "Update delivery when confirmed"
+                ? "Manage videos in Studio"
                 : credit > 0
                   ? "Review client credit"
                   : "All paid and delivered";

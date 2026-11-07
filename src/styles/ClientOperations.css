@@ -1059,3 +1059,6 @@
 .ro-summary > div {
   gap: 4px;
 }
+
+.ro-studio-work { margin: 12px 0; }
+.ro-studio-work summary {cursor:pointer} .ro-studio-work li {padding:8px 0;line-height:1.6} .ro-studio-work ul{padding-left:18px}

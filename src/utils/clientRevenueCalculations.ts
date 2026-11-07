@@ -64,12 +64,12 @@ export function calcBatchMetrics(
       ? batch.committedValue / batch.committedVideos
       : 0;
 
-  const videosDelivered = batchDeliveries.reduce(
+  const videosDelivered = batch.studioDelivered ?? batchDeliveries.reduce(
     (sum, d) => sum + d.videosCompleted,
     0,
   );
   const pendingVideos = Math.max(batch.committedVideos - videosDelivered, 0);
-  const earnedRevenue = videosDelivered * perVideoValue;
+  const earnedRevenue = Math.min(videosDelivered,batch.committedVideos) * perVideoValue;
 
   const cashReceived = batchPayments.reduce((sum, p) => sum + p.amount, 0);
   const rawReceivable = Math.max(earnedRevenue - cashReceived, 0);

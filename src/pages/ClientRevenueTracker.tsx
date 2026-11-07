@@ -31,7 +31,6 @@ type Action =
   | "client"
   | "batch"
   | "payment"
-  | "delivery"
   | "edit-client"
   | "edit-batch"
   | "settlement"
@@ -110,16 +109,18 @@ export default function ClientRevenueTracker() {
   }, [load]);
   const rows = useMemo(
     () =>
-      data.batches.map((batch) => ({
-        batch,
-        client: data.clients.find((c) => c.id === batch.clientId),
-        m: batchOperations(
+      data.batches
+        .filter((b) => !b.supersededBy)
+        .map((batch) => ({
           batch,
-          data.payments,
-          data.deliveries,
-          data.settlements,
-        ),
-      })),
+          client: data.clients.find((c) => c.id === batch.clientId),
+          m: batchOperations(
+            batch,
+            data.payments,
+            data.deliveries,
+            data.settlements,
+          ),
+        })),
     [data],
   );
   const active = rows.filter((r) => r.batch.status === "active");
@@ -303,7 +304,7 @@ export default function ClientRevenueTracker() {
           )
         )
           throw new Error(
-            "This client already has an active batch. Open it to update delivery, or end it before starting another.",
+            "This client already has an active batch. Open it in Studio to manage delivery, or end it before starting another.",
           );
         const saved = await request<Batch>(
           kind === "batch" ? "/batches" : `/batches/${modal.batchId}`,
@@ -364,49 +365,6 @@ export default function ClientRevenueTracker() {
           setData((p) => ({ ...p, payments: [saved, ...p.payments] }));
           setNotice(
             `${money(amount)} recorded for ${target.client?.name} in ${form.receivedIn}.`,
-          );
-        } else if (kind === "delivery") {
-          const total = Number(form.total),
-            baseline = Number(form.baseline);
-          if (
-            !Number.isInteger(total) ||
-            total <= baseline ||
-            total > batch.committedVideos
-          )
-            throw new Error(
-              `Enter a new total between ${baseline + 1} and ${batch.committedVideos}. This adds only the difference to the history.`,
-            );
-          if (form.date > todayIN())
-            throw new Error("Delivered work cannot have a future date.");
-          // Refresh before converting a running total into an additive delivery entry.
-          const latest = await request<Data>("/");
-          const latestTotal = latest.deliveries
-            .filter((d) => d.batchId === batch.id)
-            .reduce((s, d) => s + d.videosCompleted, 0);
-          setData(latest);
-          if (latestTotal !== baseline) {
-            set("baseline", String(latestTotal));
-            throw new Error(
-              `Another update changed the delivered total to ${latestTotal}. Review your total before saving again.`,
-            );
-          }
-          const saved = await request<DeliveryLog>("/deliveries", "POST", {
-            batchId: batch.id,
-            videosCompleted: total - baseline,
-            date: form.date,
-            notes: form.notes.trim(),
-          });
-          setData((p) => ({
-            ...p,
-            deliveries: [saved, ...p.deliveries],
-            batches: p.batches.map((b) =>
-              b.id === batch.id && total === batch.committedVideos
-                ? { ...b, status: "completed" }
-                : b,
-            ),
-          }));
-          setNotice(
-            `${target.client?.name}: ${total} of ${batch.committedVideos} videos recorded as delivered.`,
           );
         } else if (kind === "settlement") {
           const amount = Number(form.amount);
@@ -470,7 +428,6 @@ export default function ClientRevenueTracker() {
     client: "Add a client",
     batch: "Create a batch",
     payment: "Record payment",
-    delivery: "Update delivery",
     "edit-client": "Edit client",
     "edit-batch": "Edit batch",
     settlement: "Record internal settlement",
@@ -616,16 +573,19 @@ export default function ClientRevenueTracker() {
                 <button
                   className="ro-attention-stat"
                   onClick={() => {
-                    setFilter("attention");
-                    setSection("batches");
-                    setClientFilter("");
-                    setSearch("");
-                    setDetail(null);
+                    const el =
+                      document.querySelector<HTMLDetailsElement>(
+                        ".ro-studio-work",
+                      );
+                    if (el) {
+                      el.open = true;
+                      el.scrollIntoView({ block: "nearest" });
+                    }
                   }}
                 >
-                  <span>Delivery checks</span>
-                  <strong>{attention.length}</strong>
-                  <small>Missing or older delivery updates</small>
+                  <span>Studio delivery</span>
+                  <strong>View work ↗</strong>
+                  <small>Confirmed deliveries & pending work</small>
                 </button>
               </section>
               <div className="ro-workbar">
@@ -653,14 +613,71 @@ export default function ClientRevenueTracker() {
                   <button className="ro-button" onClick={() => open("payment")}>
                     Record payment
                   </button>
-                  <button
-                    className="ro-button"
-                    onClick={() => open("delivery")}
+                  <a
+                    className="ro-text-button"
+                    href="https://studio.scalebrandslab.com/"
+                    target="_blank"
+                    rel="noreferrer"
                   >
-                    Update delivery
-                  </button>
+                    Open Studio ↗
+                  </a>
                 </div>
               </div>
+              <details className="ro-panel ro-studio-work">
+                <summary>
+                  <strong>Studio delivery overview</strong> · read-only
+                </summary>
+                <p className="ro-help">
+                  Studio owns video status. Confirmed totals without video IDs
+                  stay separate from ticket completions.
+                </p>
+                <ul>
+                  {data.clients.flatMap((c) =>
+                    (c.studioWork || [])
+                      .filter(
+                        (w) =>
+                          w.status !== "Delivered" ||
+                          c.studioWork?.every(
+                            (x) => x.status === "Delivered",
+                          ) ||
+                          w.scope !== w.delivered ||
+                          w.summary.includes("historical"),
+                      )
+                      .map((w) => (
+                        <li key={w.id}>
+                          <strong>{c.name}</strong> · {w.title}
+                          <br />
+                          {w.status} · {w.delivered}/{w.scope} in Studio scope
+                          {w.summary !== w.status && " · " + w.summary}
+                          {data.batches.find((b) => b.id === w.financeId)
+                            ?.valuationPending &&
+                            " · $" +
+                              data.batches.find((b) => b.id === w.financeId)
+                                ?.nativeValue +
+                              " USD agreement; INR pending"}{" "}
+                          <small>
+                            {" "}
+                            · Synced{" "}
+                            {c.studioObserved
+                              ? new Date(c.studioObserved).toLocaleString(
+                                  "en-IN",
+                                  { timeZone: "Asia/Kolkata" },
+                                ) + " IST"
+                              : "—"}
+                          </small>
+                        </li>
+                      )),
+                  )}
+                </ul>
+                <a
+                  className="ro-text-button"
+                  href="https://studio.scalebrandslab.com/"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Manage videos in Studio ↗
+                </a>
+              </details>
               {section === "batches" && selected ? (
                 <section className="ro-detail">
                   <button className="ro-back" onClick={() => setDetail(null)}>
@@ -693,7 +710,13 @@ export default function ClientRevenueTracker() {
                       <dl>
                         <div>
                           <dt>Total price</dt>
-                          <dd>{money(selected.batch.committedValue)}</dd>
+                          <dd>
+                            {selected.batch.valuationPending
+                              ? "$" +
+                                selected.batch.nativeValue +
+                                " USD · INR pending"
+                              : money(selected.batch.committedValue)}
+                          </dd>
                         </div>
                         <div>
                           <dt>Received</dt>
@@ -733,34 +756,40 @@ export default function ClientRevenueTracker() {
                         )}
                       </div>
                       <p className="ro-delivery-number">
-                        <strong>{selected.m.videosDelivered}</strong> /{" "}
-                        {selected.batch.committedVideos} videos
+                        <strong>
+                          {selected.batch.studioScopeDelivered ??
+                            selected.m.videosDelivered}
+                        </strong>{" "}
+                        / {selected.batch.committedVideos} videos
                       </p>
                       <progress
-                        value={selected.m.videosDelivered}
+                        value={
+                          selected.batch.studioScopeDelivered ??
+                          selected.m.videosDelivered
+                        }
                         max={selected.batch.committedVideos}
                         aria-label="Videos delivered"
                       />
                       <p className="ro-help">
-                        {selected.m.lastDelivery
-                          ? `Last delivery recorded ${formatDate(selected.m.lastDelivery)}.`
-                          : "No delivery update has been recorded. Confirm with the team before updating."}
+                        {selected.batch.studioObserved
+                          ? "Studio · " + selected.batch.studioProgressNote
+                          : selected.m.lastDelivery
+                            ? `Last delivery recorded ${formatDate(selected.m.lastDelivery)}.`
+                            : "No verified Studio delivery total for this agreement."}
                       </p>
                       {selected.m.needsConfirmation && (
                         <p className="ro-warning">
                           {selected.m.nextStep}. Records may be incomplete.
                         </p>
                       )}
-                      <button
-                        className="ro-button primary"
-                        disabled={
-                          selected.batch.status !== "active" ||
-                          selected.m.pendingVideos === 0
-                        }
-                        onClick={() => open("delivery", selected.batch.id)}
+                      <a
+                        className="ro-text-button"
+                        href="https://studio.scalebrandslab.com/"
+                        target="_blank"
+                        rel="noreferrer"
                       >
-                        Update delivery
-                      </button>
+                        Open Studio ↗
+                      </a>
                     </section>
                   </div>
                   <section className="ro-panel ro-scope">
@@ -789,7 +818,7 @@ export default function ClientRevenueTracker() {
                             id: "d" + d.id,
                             date: d.date,
                             title: `${d.videosCompleted} videos delivered`,
-                            meta: "Delivery update",
+                            meta: "Historical delivery entry",
                             notes: d.notes,
                           })),
                       ]
@@ -807,8 +836,8 @@ export default function ClientRevenueTracker() {
                       {!data.payments.some((p) => p.batchId === detail) &&
                         !data.deliveries.some((d) => d.batchId === detail) && (
                           <p className="ro-help">
-                            No activity yet. Record a payment or update delivery
-                            above.
+                            No activity yet. Record a payment in FinTrack or
+                            open Studio above.
                           </p>
                         )}
                     </div>
@@ -938,8 +967,8 @@ export default function ClientRevenueTracker() {
                       <p className="ro-caption">
                         {visible.length}{" "}
                         {visible.length === 1 ? "batch" : "batches"} · Delivery
-                        counts reflect recorded updates, not a live production
-                        feed.
+                        is read-only. Studio totals replace historical logs;
+                        unlinked records show legacy history.
                       </p>
                       <div className="ro-batch-list">
                         <div className="ro-table-head">
@@ -980,14 +1009,23 @@ export default function ClientRevenueTracker() {
                               {paymentBadge(m)}
                               <p>
                                 <strong>{money(m.cashReceived)}</strong>{" "}
-                                <span>of {money(batch.committedValue)}</span>
+                                <span>
+                                  of{" "}
+                                  {batch.valuationPending
+                                    ? "$" +
+                                      batch.nativeValue +
+                                      " USD · INR pending"
+                                    : money(batch.committedValue)}
+                                </span>
                               </p>
                               <small
                                 className={
                                   m.remaining > 0 ? "ro-amount-due" : ""
                                 }
                               >
-                                {showBalance(m)}
+                                {batch.valuationPending
+                                  ? "INR valuation pending"
+                                  : showBalance(m)}
                               </small>
                               {m.fxAdjusted && (
                                 <small className="ro-fx">
@@ -997,18 +1035,24 @@ export default function ClientRevenueTracker() {
                             </div>
                             <div className="ro-delivery-cell">
                               <strong>
-                                {m.videosDelivered}
+                                {batch.studioScopeDelivered ??
+                                  m.videosDelivered}
                                 <span> / {batch.committedVideos} videos</span>
                               </strong>
                               <progress
-                                value={m.videosDelivered}
+                                value={
+                                  batch.studioScopeDelivered ??
+                                  m.videosDelivered
+                                }
                                 max={batch.committedVideos}
                                 aria-label={`${client?.name} videos delivered`}
                               />
                               <small>
-                                {m.lastDelivery
-                                  ? `Last update ${formatDate(m.lastDelivery)}`
-                                  : "No delivery recorded"}
+                                {batch.studioObserved
+                                  ? "Studio · " + batch.studioProgressNote
+                                  : m.lastDelivery
+                                    ? `Historical log · ${formatDate(m.lastDelivery)}`
+                                    : "No verified Studio count"}
                               </small>
                               {m.overdue &&
                                 statusBadge("Past expected date", "amber")}
@@ -1026,16 +1070,14 @@ export default function ClientRevenueTracker() {
                                 >
                                   Record payment
                                 </button>
-                                <button
-                                  disabled={
-                                    batch.status !== "active" ||
-                                    m.pendingVideos === 0
-                                  }
-                                  onClick={() => open("delivery", batch.id)}
-                                  aria-label={`Update delivery for ${client?.name}, ${batch.batchName}`}
+                                <a
+                                  className="ro-text-button"
+                                  href="https://studio.scalebrandslab.com/"
+                                  target="_blank"
+                                  rel="noreferrer"
                                 >
-                                  Update delivery
-                                </button>
+                                  Open Studio ↗
+                                </a>
                               </div>
                               <button
                                 className="ro-text-button"
@@ -1057,7 +1099,7 @@ export default function ClientRevenueTracker() {
                           <p>
                             {rows.length
                               ? "Try another filter or clear your search."
-                              : "Add a client, create their batch, then record payment and delivery as they happen."}
+                              : "Add a client, create their batch, then record receipts here and manage delivery in Studio."}
                           </p>
                           <button
                             className="ro-button"
@@ -1333,9 +1375,7 @@ export default function ClientRevenueTracker() {
                   )}
                 </>
               )}
-              {["payment", "delivery", "settlement", "end"].includes(
-                modal.kind,
-              ) && (
+              {["payment", "settlement", "end"].includes(modal.kind) && (
                 <>
                   {!modal.batchId && (
                     <label className="ro-field">
@@ -1346,17 +1386,11 @@ export default function ClientRevenueTracker() {
                         required
                       >
                         <option value="">Choose a batch</option>
-                        {rows
-                          .filter(
-                            (r) =>
-                              modal.kind !== "delivery" ||
-                              r.batch.status === "active",
-                          )
-                          .map((r) => (
-                            <option key={r.batch.id} value={r.batch.id}>
-                              {r.client?.name} · {r.batch.batchName}
-                            </option>
-                          ))}
+                        {rows.map((r) => (
+                          <option key={r.batch.id} value={r.batch.id}>
+                            {r.client?.name} · {r.batch.batchName}
+                          </option>
+                        ))}
                       </select>
                     </label>
                   )}
@@ -1365,10 +1399,19 @@ export default function ClientRevenueTracker() {
                       {target && (
                         <div className="ro-form-context">
                           <span>
-                            Total {money(target.batch.committedValue)}
+                            Total{" "}
+                            {target.batch.valuationPending
+                              ? "$" +
+                                target.batch.nativeValue +
+                                " USD · INR pending"
+                              : money(target.batch.committedValue)}
                           </span>
                           <span>Received {money(target.m.cashReceived)}</span>
-                          <strong>{showBalance(target.m)}</strong>
+                          <strong>
+                            {target.batch.valuationPending
+                              ? "INR valuation pending"
+                              : showBalance(target.m)}
+                          </strong>
                         </div>
                       )}
                       <div className="ro-form-grid">
@@ -1401,51 +1444,6 @@ export default function ClientRevenueTracker() {
                         Record only money already received. Full or partial
                         status updates automatically.
                       </p>
-                    </>
-                  )}
-                  {modal.kind === "delivery" && (
-                    <>
-                      {target && (
-                        <div className="ro-form-context">
-                          <span>
-                            Currently recorded: {form.baseline} /{" "}
-                            {target.batch.committedVideos}
-                          </span>
-                          <strong>
-                            {target.batch.committedVideos -
-                              Number(form.baseline)}{" "}
-                            still unrecorded
-                          </strong>
-                        </div>
-                      )}
-                      <div className="ro-form-grid">
-                        {field(
-                          "total",
-                          "Total videos delivered so far",
-                          "number",
-                          true,
-                        )}
-                        {field("date", "Delivery date", "date", true)}
-                      </div>
-                      {target && (
-                        <>
-                          <button
-                            type="button"
-                            className="ro-text-button"
-                            onClick={() =>
-                              set("total", String(target.batch.committedVideos))
-                            }
-                          >
-                            All {target.batch.committedVideos} videos delivered
-                          </button>
-                          <p className="ro-help">
-                            {Number(form.total) > Number(form.baseline)
-                              ? `This will add ${Number(form.total) - Number(form.baseline)} newly delivered videos to the history.`
-                              : "Enter the new running total, not the number in the latest delivery."}{" "}
-                            Only save after confirming delivery with the team.
-                          </p>
-                        </>
-                      )}
                     </>
                   )}
                   {modal.kind === "settlement" && (
@@ -1525,11 +1523,9 @@ export default function ClientRevenueTracker() {
                         : "Create batch"
                       : modal.kind === "payment"
                         ? "Save payment"
-                        : modal.kind === "delivery"
-                          ? "Save delivery update"
-                          : modal.kind === "end"
-                            ? "End batch early"
-                            : "Save changes"}
+                        : modal.kind === "end"
+                          ? "End batch early"
+                          : "Save changes"}
               </button>
             </footer>
           </form>

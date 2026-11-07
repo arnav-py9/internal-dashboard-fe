@@ -102,7 +102,19 @@ try {
   assert.equal(run(1000, 10).deliveryStatus, "Delivered");
   assert.equal(run(994, 10).receivable, 0);
   assert.equal(run(950, 10).receivable, 50);
-  console.log("20 client revenue calculation checks passed.");
+  const mirrored = run(1000, 10, { ...base, studioDelivered: 11 });
+  assert.equal(mirrored.videosDelivered, 11);
+  assert.equal(mirrored.earnedRevenue, 1000);
+  assert.equal(mirrored.receivable, 0);
+  assert.equal(
+    run(1000, 10, { ...base, studioDelivered: 0 }).videosDelivered,
+    0,
+  );
+  assert.equal(
+    run(50, 0, { ...base, committedValue: 0, valuationPending: true }).credit,
+    0,
+  );
+  console.log("25 client revenue calculation checks passed.");
 } finally {
   rmSync(dir, { recursive: true, force: true });
 }
